@@ -10,7 +10,12 @@
     "build": "rollup -c",
     "start": "rollup -c -w"
   },
-  "keywords": [],
+  "keywords": [
+    "sunrise",
+    "sunset",
+    "sun",
+    "dark mode"
+  ],
   "author": "Roman Yanke <roman@yanke.ru>",
   "license": "MIT",
   "devDependencies": {
