@@ -6,13 +6,13 @@ The script checks the [timezone name](https://en.wikipedia.org/wiki/List_of_tz_d
 
 ## Installation
 
-```
+```sh
 npm install daynight --save-dev
 ```
 
 ## Usage
 
-```
+```js
 import daynight from 'daynight'
 
 const isDaylight = daynight()
@@ -22,3 +22,16 @@ const theme = isDaylight ? 'light' : 'dark'
 ## Browser compatibility
 
 To get the timezone name it uses Internationalization API https://caniuse.com/#feat=internationalization
+
+## Options
+
+If script fails it returns `true` by default. The default value can be overwritten by passing that value as a parameter:
+
+```js
+const isDaylight = daynight(true)
+```
+
+The script fails when:
+
+- Browser doesn't support Internationalization API
+- User's timezone is not found in the list of timezones (not sure if this is a real case)
