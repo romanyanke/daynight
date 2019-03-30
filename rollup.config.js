@@ -20,6 +20,12 @@ export default {
       exports: 'named',
       sourcemap: true,
     },
+    {
+      file: pkg.browser,
+      format: 'iife',
+      exports: 'named',
+      name: pkg.name,
+    },
   ],
   plugins: [
     external(),

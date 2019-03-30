@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",
+  "browser": "dist/daynight.js",
   "scripts": {
     "test": "jest",
     "build": "rm -rf dist && rollup -c",
