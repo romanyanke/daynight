@@ -11,6 +11,7 @@ export interface DaynightError {
 }
 export interface DaynightSuccess {
   timezone: string
+  coordinates: [number, number]
   error: null
   light: boolean
   dark: boolean
@@ -36,6 +37,7 @@ const daynight: Daynight = config => {
       return {
         error: null,
         timezone: options.timeZone,
+        coordinates,
         light,
         dark,
         sunrise,
