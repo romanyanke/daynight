@@ -4,6 +4,8 @@ This script tries to guess is it dark or light now in the user's location. It do
 
 The script checks the [timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) and match it to the center coordinates of this timezone and use this information to calculate sunrise and sunset time.
 
+See [demo here](https://romanyanke.github.io/daynight/).
+
 ## Browser compatibility
 
 To get the timezone name it uses Internationalization API https://caniuse.com/#feat=internationalization.
