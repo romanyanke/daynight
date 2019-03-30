@@ -3,80 +3,105 @@ import daynight from '../src'
 describe('Asia/Novosibirsk GMT+7', () => {
   it('summer day sunrise', () => {
     expect(
-      daynight(false, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-07-15T05:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-07-15T05:00+07:00'),
       }),
-    ).toBe(false)
+    ).toMatchObject({ light: false })
 
     expect(
-      daynight(false, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-07-15T05:30+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-07-15T05:30+07:00'),
       }),
-    ).toBe(true)
+    ).toMatchObject({ light: true })
   })
 
   it('summer day sunset', () => {
     expect(
-      daynight(false, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-07-15T22:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-07-15T22:00+07:00'),
       }),
-    ).toBe(true)
+    ).toMatchObject({ light: true })
     expect(
-      daynight(true, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-07-15T23:30+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-07-15T23:30+07:00'),
       }),
-    ).toBe(false)
+    ).toMatchObject({ light: false })
   })
 
   it('winter day sunrise', () => {
     expect(
-      daynight(true, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-01-15T09:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-01-15T09:00+07:00'),
       }),
-    ).toBe(false)
+    ).toMatchObject({ light: false })
 
     expect(
-      daynight(false, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-01-15T10:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-01-15T10:00+07:00'),
       }),
-    ).toBe(true)
+    ).toMatchObject({ light: true })
   })
 
   it('winter day sunset', () => {
     expect(
-      daynight(false, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-01-15T17:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-01-15T17:00+07:00'),
       }),
-    ).toBe(true)
+    ).toMatchObject({ light: true })
 
     expect(
-      daynight(true, {
-        timeZoneName: 'Asia/Novosibirsk',
-        now: new Date('2015-01-15T18:00+07:00'),
+      daynight({
+        timeZone: 'Asia/Novosibirsk',
+        date: new Date('2015-01-15T18:00+07:00'),
       }),
-    ).toBe(false)
+    ).toMatchObject({ light: false })
   })
 })
 
-describe('Fallback', () => {
-  it('should use fallback if time zone name is undefined or incorrect', () => {
+describe('White night and polar night', () => {
+  it('summer day sunrise', () => {
     expect(
-      daynight(true, {
-        timeZoneName: 'i-am-not-a-tz',
+      daynight({
+        timeZone: 'Europe/Moscow',
+        date: new Date('2015-06-15T21:30+04:00'),
       }),
-    ).toBe(true)
+    ).toMatchObject({ light: true })
+  })
 
+  it('summer day sunrise', () => {
     expect(
-      daynight(false, {
-        timeZoneName: 'i-am-not-a-tz',
+      daynight({
+        timeZone: 'Arctic/Longyearbyen',
+        date: new Date('2015-12-20T12:00+04:00'),
       }),
-    ).toBe(false)
+    ).toMatchObject({ light: false })
+  })
+})
+
+describe('Errors', () => {
+  describe('timezone is incorrect', () => {
+    it('should return an error', () => {
+      expect(
+        daynight({
+          timeZone: 'i-am-not-a-tz',
+        }),
+      ).toMatchObject({ error: expect.any(Error) })
+    })
+  })
+
+  describe('Intl is not supported', () => {
+    beforeAll(() => {
+      ;(global as any).Intl = undefined
+    })
+    it('should return an error', () => {
+      expect(daynight()).toMatchObject({ error: expect.any(TypeError) })
+    })
   })
 })

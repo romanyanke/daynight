@@ -1,8 +1,12 @@
 # Day or night
 
-This script tries to guess is it dark or light now in the user's area. It doesn't ask user location it doesn't rely on ip address it doesn't use bleeding edge features (like [DeviceLightEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceLightEvent/Using_light_sensors) or [light-level CSS media](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/light-level)).
+This script tries to guess is it dark or light now in the user's location. It doesn't ask user location it doesn't rely on ip address it doesn't use bleeding edge features (like [DeviceLightEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceLightEvent/Using_light_sensors) or [light-level CSS media](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/light-level)).
 
-The script checks the [timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) and match it to the center coordinates of this timezone and use this information to calculate sunrise and sunset time. The script returns `true` before the sunset (meaning it's light) and `false` after the sunset (it's dark).
+The script checks the [timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) and match it to the center coordinates of this timezone and use this information to calculate sunrise and sunset time.
+
+## Browser compatibility
+
+To get the timezone name it uses Internationalization API https://caniuse.com/#feat=internationalization.
 
 ## Installation
 
@@ -15,23 +19,43 @@ npm install daynight --save-dev
 ```js
 import daynight from 'daynight'
 
-const isDaylight = daynight()
-const theme = isDaylight ? 'light' : 'dark'
+const result = daynight()
+const useLightTheme = result.error ? /* fallack */ true : result.light
 ```
 
-## Browser compatibility
-
-To get the timezone name it uses Internationalization API https://caniuse.com/#feat=internationalization
-
-## Options
-
-If script fails it returns `true` by default. The default value can be overwritten by passing that value as a parameter:
+You can pass time zone name and/or date as options. By default it's user's time zone and current date.
 
 ```js
-const isDaylight = daynight(true)
+daynight({
+  timeZone: 'Africa/Nairobi',
+  date: new Date('2012-12-20T12:00'),
+})
 ```
 
 The script fails when:
 
 - Browser doesn't support Internationalization API
-- User's timezone is not found in the list of timezones (not sure if this is a real case)
+- User's timezone is not found in the list of timezones.
+
+## Result interface
+
+In case of an error you get
+
+```typescript
+{
+  error: Error
+}
+```
+
+In all other cases
+
+```typescript
+{
+  error: null
+  dark: boolean
+  light: boolean
+  sunrise: Date
+  sunset: Date
+  timezone: string
+}
+```
