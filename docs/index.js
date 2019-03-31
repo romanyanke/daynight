@@ -9,15 +9,13 @@ if (day.error) {
 }
 
 var infoHtml =
-  "You're in <b>" +
-  day.timezone +
-  '</b>. Current date is ' +
-  date.toLocaleDateString() +
-  ' ' +
-  date.toLocaleTimeString() +
-  ". I think it's " +
-  (day.light ? '<b>😎 light</b>' : '<b>🌚 dark</b>') +
-  ' there.'
+  '<ul><li>' +
+  [
+    "You're in <b>" + day.timezone + '</b>',
+    'Current date is ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.',
+    "I think it's " + (day.light ? '😎<b>light</b>' : '<b>🌚 dark</b>') + ' there.',
+  ].join('</li><li>') +
+  '</li></ul>'
 
 infoBlock.innerHTML = infoHtml
 
