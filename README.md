@@ -54,6 +54,7 @@ In all other cases
 ```typescript
 {
   error: null
+  coordinates: [number, number]
   dark: boolean
   light: boolean
   sunrise: Date
