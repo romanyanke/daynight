@@ -1,4 +1,4 @@
-import daynight from '../src'
+import { default as daynight } from '../src'
 
 describe('Asia/Novosibirsk GMT+7', () => {
   it('summer day sunrise', () => {

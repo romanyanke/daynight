@@ -21,7 +21,7 @@ export default {
       sourcemap: true,
     },
     {
-      file: pkg.browser,
+      file: 'dist/daynight.js',
       format: 'iife',
       exports: 'named',
       name: pkg.name,
