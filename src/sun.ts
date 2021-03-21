@@ -6,7 +6,7 @@ const DR = PI / 180
 const K1 = 15 * DR * 1.0027379
 
 // Local Sidereal Time for zone
-const lst = (lon: number, jd: number, z: number): number => {
+const lst = (lon: number, jd: number, z: number) => {
   let s = 24110.5 + (8640184.812999999 * jd) / 36525 + 86636.6 * z + 86400 * lon
   s = s / 86400
   s = s - Math.floor(s)

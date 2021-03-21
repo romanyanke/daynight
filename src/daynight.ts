@@ -1,4 +1,4 @@
-import tzCoordinates from './timeZoneCoordinates'
+import { timeZoneCoordinates } from './timeZoneCoordinates'
 import sun from './sun'
 
 export type Daynight = (options?: DaynightOptions) => DaynightSuccess | DaynightError
@@ -28,36 +28,35 @@ const daynight: Daynight = config => {
 
     const coordinates = getTimeZoneCoordinates(options.timeZone)
 
-    if (coordinates) {
-      const { sunrise, sunset } = sun(options.date, coordinates[0], coordinates[1])
-
-      const dark = options.date < sunrise || options.date > sunset
-      const light = !dark
-
-      return {
-        error: null,
-        timezone: options.timeZone,
-        coordinates,
-        light,
-        dark,
-        sunrise,
-        sunset,
-      }
+    if (!coordinates) {
+      throw new Error(`Timezone "${options.timeZone}" not found`)
     }
 
-    const errorMessage = `Timezone "${options.timeZone}" is not found`
-    throw new Error(errorMessage)
+    const [lon, lat] = coordinates
+    const { sunrise, sunset } = sun(options.date, lon, lat)
+    const dark = options.date < sunrise || options.date > sunset
+    const light = !dark
+
+    return {
+      error: null,
+      timezone: options.timeZone,
+      coordinates,
+      light,
+      dark,
+      sunrise,
+      sunset,
+    }
   } catch (error) {
     return { error }
   }
 }
 
-const getTimeZoneName = (): string => Intl.DateTimeFormat().resolvedOptions().timeZone
+const getTimeZoneName = () => Intl.DateTimeFormat().resolvedOptions().timeZone
 const getDefaultOptions = (): Required<DaynightOptions> => ({
   timeZone: getTimeZoneName(),
   date: new Date(),
 })
 const getTimeZoneCoordinates = (timeZone: string): [number, number] | undefined =>
-  tzCoordinates[timeZone]
+  timeZoneCoordinates[timeZone]
 
 export default daynight
