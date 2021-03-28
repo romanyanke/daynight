@@ -51,6 +51,6 @@ The script fails when:
 }
 ```
 
-## Changlog
+## Changelog
 
 See [Changelog.md](CHANGELOG.md).
