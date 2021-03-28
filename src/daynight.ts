@@ -1,18 +1,15 @@
 import { timeZoneCoordinates } from './timeZoneCoordinates'
 import sun from './sun'
 
-export type Daynight = (options?: DaynightOptions) => DaynightSuccess | DaynightError
+export type Daynight = (options?: DaynightOptions) => DaynightResult
 export interface DaynightOptions {
   timeZone?: string
   date?: Date
 }
-export interface DaynightError {
-  error: Error
-}
-export interface DaynightSuccess {
+
+export interface DaynightResult {
   timezone: string
   coordinates: [number, number]
-  error: null
   light: boolean
   dark: boolean
   sunset: Date
@@ -20,40 +17,34 @@ export interface DaynightSuccess {
 }
 
 const daynight: Daynight = config => {
-  try {
-    const options = {
-      ...getDefaultOptions(),
-      ...config,
-    }
+  const options = {
+    ...getDefaultOptions(),
+    ...config,
+  }
 
-    const coordinates = getTimeZoneCoordinates(options.timeZone)
+  const coordinates = getTimeZoneCoordinates(options.timeZone)
 
-    if (!coordinates) {
-      throw new Error(`Timezone "${options.timeZone}" not found`)
-    }
+  if (!coordinates) {
+    throw new Error(`Timezone "${options.timeZone}" not found`)
+  }
 
-    const [lon, lat] = coordinates
-    const { sunrise, sunset } = sun(options.date, lon, lat)
-    const dark = options.date < sunrise || options.date > sunset
-    const light = !dark
+  const [lon, lat] = coordinates
+  const { sunrise, sunset } = sun(options.date, lon, lat)
+  const dark = options.date < sunrise || options.date > sunset
+  const light = !dark
 
-    return {
-      error: null,
-      timezone: options.timeZone,
-      coordinates,
-      light,
-      dark,
-      sunrise,
-      sunset,
-    }
-  } catch (error) {
-    return { error }
+  return {
+    timezone: options.timeZone,
+    coordinates,
+    light,
+    dark,
+    sunrise,
+    sunset,
   }
 }
 
-const getTimeZoneName = () => Intl.DateTimeFormat().resolvedOptions().timeZone
 const getDefaultOptions = (): Required<DaynightOptions> => ({
-  timeZone: getTimeZoneName(),
+  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   date: new Date(),
 })
 const getTimeZoneCoordinates = (timeZone: string): [number, number] | undefined =>

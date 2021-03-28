@@ -88,11 +88,9 @@ describe('White night and polar night', () => {
 describe('Errors', () => {
   describe('timezone is incorrect', () => {
     it('should return an error', () => {
-      expect(
-        daynight({
-          timeZone: 'i-am-not-a-tz',
-        }),
-      ).toMatchObject({ error: expect.any(Error) })
+      expect(() => daynight({ timeZone: 'i-am-not-a-tz' })).toThrowError(
+        'Timezone "i-am-not-a-tz" not found',
+      )
     })
   })
 
@@ -101,7 +99,7 @@ describe('Errors', () => {
       ;(global as any).Intl = undefined
     })
     it('should return an error', () => {
-      expect(daynight()).toMatchObject({ error: expect.any(TypeError) })
+      expect(() => daynight()).toThrowError(TypeError)
     })
   })
 })

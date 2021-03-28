@@ -1,1 +1,1 @@
-export { DaynightError, DaynightSuccess, Daynight, DaynightOptions, default } from './daynight'
+export { DaynightResult, Daynight, DaynightOptions, default } from './daynight'
