@@ -1,4 +1,4 @@
-# Day or night
+# 🌞 Day or night 🌚
 
 This script tries to guess is it dark or light now in the user's location. It doesn't ask user location it doesn't rely on ip address it doesn't use bleeding edge features (like [DeviceLightEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceLightEvent/Using_light_sensors) or [light-level CSS media](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/light-level)).
 
@@ -21,8 +21,7 @@ npm install daynight --save-dev
 ```js
 import daynight from 'daynight'
 
-const result = daynight()
-const useLightTheme = result.error ? /* fallack */ true : result.light
+const isLight = daynight().light
 ```
 
 You can pass time zone name and/or date as options. By default it's user's time zone and current date.
@@ -37,23 +36,12 @@ daynight({
 The script fails when:
 
 - Browser doesn't support Internationalization API
-- User's timezone is not found in the list of timezones.
+- Timezone not found in the list of timezones.
 
-## Result interface
-
-In case of an error you get
+## Result
 
 ```typescript
 {
-  error: Error
-}
-```
-
-In all other cases
-
-```typescript
-{
-  error: null
   coordinates: [number, number]
   dark: boolean
   light: boolean
@@ -62,3 +50,7 @@ In all other cases
   timezone: string
 }
 ```
+
+## Changlog
+
+See [Changelog.md](CHANGELOG.md).
