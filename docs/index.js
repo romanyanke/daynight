@@ -5,7 +5,7 @@ var mapBlock = document.getElementById('map')
 var codeBlock = document.getElementById('code')
 
 if (day.error) {
-  document.body.innerHTML = '<h1>An error occured: ' + day.error.message + '</h1>'
+  document.body.innerHTML = '<h1>An error occurred: ' + day.error.message + '</h1>'
 }
 
 var infoHtml =
@@ -13,7 +13,8 @@ var infoHtml =
   [
     "You're in <b>" + day.timezone + '</b>',
     'Current date is ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.',
-    "I think it's " + (day.light ? '😎<b>light</b>' : '<b>🌚 dark</b>') + ' there.',
+    "I think it's " + (day.light ? '😎 <b>light</b>' : '🌚 <b>dark</b>') + ' there.',
+    'The brightness is ' + Math.round(day.brightness * 100) + '%',
   ].join('</li><li>') +
   '</li></ul>'
 

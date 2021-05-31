@@ -1,1 +1,2 @@
-export { DaynightResult, Daynight, DaynightOptions, default } from './daynight'
+export { default } from './daynight'
+export type { DaynightResult, Daynight, DaynightOptions } from './daynight'

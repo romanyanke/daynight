@@ -1,4 +1,5 @@
 import { default as daynight } from '../src'
+import { getProgress } from '../src/brightness'
 
 describe('Asia/Novosibirsk GMT+7', () => {
   it('summer day sunrise', () => {
@@ -101,5 +102,25 @@ describe('Errors', () => {
     it('should return an error', () => {
       expect(() => daynight()).toThrowError(TypeError)
     })
+  })
+})
+
+describe('should return getProgress from 0 (min) to 1 (max) and 0.5 for start/end points', () => {
+  test('24 cycle', () => {
+    const tension = getProgress({ cycle: 24, start: 8, end: 16 })
+
+    expect(tension(24)).toBe(0)
+    expect(tension(8)).toBe(0.5)
+    expect(tension(12)).toBe(1)
+    expect(tension(16)).toBe(0.5)
+  })
+
+  test('100 cycle', () => {
+    const tension = getProgress({ cycle: 100, start: 20, end: 60 })
+
+    expect(tension(90)).toBe(0)
+    expect(tension(20)).toBe(0.5)
+    expect(tension(40)).toBe(1)
+    expect(tension(60)).toBe(0.5)
   })
 })

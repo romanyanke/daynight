@@ -1,5 +1,6 @@
 import { timeZoneCoordinates } from './timeZoneCoordinates'
 import sun from './sun'
+import { getBrightness } from './brightness'
 
 export type Daynight = (options?: DaynightOptions) => DaynightResult
 export interface DaynightOptions {
@@ -8,6 +9,7 @@ export interface DaynightOptions {
 }
 
 export interface DaynightResult {
+  brightness: number
   timezone: string
   coordinates: [number, number]
   light: boolean
@@ -30,16 +32,18 @@ const daynight: Daynight = config => {
 
   const [lon, lat] = coordinates
   const { sunrise, sunset } = sun(options.date, lon, lat)
+  const brightness = getBrightness([sunrise, sunset])(options.date)
   const dark = options.date < sunrise || options.date > sunset
   const light = !dark
 
   return {
-    timezone: options.timeZone,
     coordinates,
-    light,
     dark,
+    light,
+    brightness,
     sunrise,
     sunset,
+    timezone: options.timeZone,
   }
 }
 
