@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/romanyanke/daynight/compare/v3.0.6...v3.1.0) (2021-11-13)
+
+
+### Features
+
+* Add brightness value ([d4d251d](https://github.com/romanyanke/daynight/commit/d4d251dd2ea3b131f3d4807a84acca85be4ee251))
+
 ### [3.0.6](https://github.com/romanyanke/daynight/compare/v3.0.5...v3.0.6) (2021-11-13)
 
 
