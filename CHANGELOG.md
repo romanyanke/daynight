@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.6](https://github.com/romanyanke/daynight/compare/v3.0.5...v3.0.6) (2021-11-13)
+
+
+### Bug Fixes
+
+* dependencies update ([e57e087](https://github.com/romanyanke/daynight/commit/e57e0871b2dc02429f56a3074aadef2e77736ec0))
+
 ### [3.0.5](https://github.com/romanyanke/daynight/compare/v3.0.4...v3.0.5) (2021-10-20)
 
 ### [3.0.4](https://github.com/romanyanke/daynight/compare/v3.0.3...v3.0.4) (2021-09-21)
