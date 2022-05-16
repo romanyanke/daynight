@@ -1,10 +1,10 @@
 # 🌞 Day or night 🌚
 
-This script tries to guess is it dark or light now in the user's location. It doesn't ask user location it doesn't rely on IP address it doesn't use bleeding-edge features (like [DeviceLightEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceLightEvent/Using_light_sensors) or [light-level CSS media](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/light-level)).
+This script tries to guess is it dark or light now in the user's location. It doesn't ask for user location. It doesn't rely on IP addresses. It doesn't use bleeding-edge features (like DeviceLightEvent or light-level CSS media).
 
-The script checks the [timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) and matches it to the center coordinates of this timezone and use this information to calculate sunrise and sunset time.
+The script gets the timezone name. It finds the coordinates of the center of this timezone and uses this information to calculate sunrise and sunset time.
 
-See [demo here](https://romanyanke.github.io/daynight/).
+The result is more or less adequate, usually. See [demo here](https://romanyanke.github.io/daynight/).
 
 ## Browser compatibility
 
@@ -54,7 +54,7 @@ The script fails when:
 
 ## Brightness
 
-Brightness is a value between 0 and 1. Zero is the darkest value, and 1 is the most bright one. The brightness is 0.5 on sunrise and sunset.
+Brightness is a value between 0 and 1. Zero is the darkest value, and 1 is the most bright one. The brightness is 0.5 at sunrise and sunset.
 
 ## Changelog
 
