@@ -5,20 +5,21 @@
  * Go to Releases https://github.com/evansiroky/timezone-boundary-builder/releases
  * Download a file timezones.geojson.zip
  * Paste its content (combined.json) into this folder (so require('./combined.json') works)
- * Run `node generateTimeZonesCoordinates`
+ * Run `npm run generate`
  */
 
-const combined = require('./combined.json')
-const jsts = require('jsts')
-const fs = require('fs')
+import combined from './combined.json' assert { type: 'json' }
+import { writeFileSync } from 'fs'
+import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader.js'
+import Centroid from 'jsts/org/locationtech/jts/algorithm/Centroid.js'
 
-const geoJsonReader = new jsts.io.GeoJSONReader()
+const geoJsonReader = new GeoJSONReader()
 const round = n => Math.round(n * 100) / 100
 
 const result = combined.features.reduce((acc, feature) => {
   const timezoneName = feature.properties.tzid
   const geometry = geoJsonReader.read(JSON.stringify(feature.geometry))
-  const centroid = new jsts.algorithm.Centroid(geometry)
+  const centroid = new Centroid(geometry)
   const { x, y } = centroid.getCentroid()
 
   return {
@@ -34,4 +35,4 @@ const fileContent = [
   '',
 ].join('\n')
 
-fs.writeFileSync('./src/timeZoneCoordinates.ts', fileContent)
+writeFileSync('./src/timeZoneCoordinates.ts', fileContent)

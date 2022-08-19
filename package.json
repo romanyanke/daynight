@@ -5,7 +5,11 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "jsnext:main": "dist/index.es.js",
+  "engines": {
+    "node": ">=16.5"
+  },
   "scripts": {
+    "generate": "node generate.mjs",
     "test": "jest",
     "build": "rollup -c",
     "preversion": "rm -rf dist && npm run build",
