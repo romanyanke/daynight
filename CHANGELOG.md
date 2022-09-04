@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/romanyanke/daynight/compare/v3.1.1...v3.2.0) (2022-09-04)
+
+
+### Features
+
+* Reduce bundle size by minifying timezone names ([cc60fbf](https://github.com/romanyanke/daynight/commit/cc60fbf95d97b731755d11d5255e1171d46dcca0))
+
 ### [3.1.1](https://github.com/romanyanke/daynight/compare/v3.1.0...v3.1.1) (2022-05-16)
 
 
