@@ -28,15 +28,5 @@ export default {
       name: pkg.name,
     },
   ],
-  plugins: [
-    external(),
-    url(),
-    resolve(),
-    typescript({
-      rollupCommonJSResolveHack: true,
-      clean: true,
-    }),
-    commonjs(),
-    terser(),
-  ],
+  plugins: [external(), url(), resolve(), typescript({ clean: true }), commonjs(), terser()],
 }
