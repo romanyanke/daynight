@@ -1,6 +1,8 @@
-import { timeZoneCoordinates } from './timeZoneCoordinates'
+import tz from './timezones'
 import sun from './sun'
 import { getBrightness } from './brightness'
+
+const timeZones = tz as Record<string, [number, number]>
 
 export type Daynight = (options?: DaynightOptions) => DaynightResult
 export interface DaynightOptions {
@@ -51,7 +53,8 @@ const getDefaultOptions = (): Required<DaynightOptions> => ({
   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   date: new Date(),
 })
+
 const getTimeZoneCoordinates = (timeZone: string): [number, number] | undefined =>
-  timeZoneCoordinates[timeZone]
+  timeZones[timeZone]
 
 export default daynight

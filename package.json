@@ -9,7 +9,7 @@
     "node": ">=16.5"
   },
   "scripts": {
-    "generate": "node generate.mjs",
+    "generate": "node scripts/generate.mjs && prettier 'src/timezones.js' --write",
     "test": "jest",
     "build": "rollup -c",
     "preversion": "rm -rf dist && npm run build",
@@ -29,6 +29,7 @@
     "@types/jest": "^27.5.1",
     "jest": "^28.1.0",
     "jsts": "^2.9.0",
+    "prettier": "^2.7.1",
     "rollup": "^2.73.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
