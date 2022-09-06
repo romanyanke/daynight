@@ -10,7 +10,10 @@ export interface DaynightOptions {
   date?: Date
 }
 
+export type DaynightTheme = 'day' | 'night'
+
 export interface DaynightResult {
+  theme: DaynightTheme
   brightness: number
   timezone: string
   coordinates: [number, number]
@@ -37,14 +40,16 @@ const daynight: Daynight = config => {
   const brightness = getBrightness([sunrise, sunset])(options.date)
   const dark = options.date < sunrise || options.date > sunset
   const light = !dark
+  const theme: DaynightTheme = dark ? 'night' : 'day'
 
   return {
+    brightness,
     coordinates,
     dark,
     light,
-    brightness,
     sunrise,
     sunset,
+    theme,
     timezone: options.timeZone,
   }
 }

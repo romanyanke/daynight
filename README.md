@@ -49,6 +49,7 @@ The script fails when:
   sunset: Date
   timezone: string
   brightness: number
+  theme: 'day' | 'night'
 }
 ```
 
