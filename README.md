@@ -1,22 +1,30 @@
-# 🌞 Day or night 🌚
+# 🌞 Day or Night 🌚
 
-This script tries to guess is it dark or light now in the user's location. It doesn't ask for user location. It doesn't rely on IP addresses. It doesn't use bleeding-edge features (like DeviceLightEvent or light-level CSS media).
+## Overview
 
-The script gets the timezone name. It finds the coordinates of the center of this timezone and uses this information to calculate sunrise and sunset time.
+"Day or Night" is a lightweight JavaScript utility designed to determine whether it is currently day or night in the user's location. Remarkably, this script accomplishes its task without requesting the user's location, relying on IP addresses, or utilizing advanced web features like `DeviceLightEvent` or light-level CSS media queries.
 
-The result is more or less adequate, usually. See [demo here](https://romanyanke.github.io/daynight/).
+## How It Works
 
-## Browser compatibility
+The script operates by first acquiring the user's timezone name. It then calculates the geographical coordinates of the center of this timezone. Using these coordinates, "Day or Night" determines the local sunrise and sunset times to assess whether it is day or night.
 
-To get the timezone name, it uses Internationalization API https://caniuse.com/#feat=internationalization.
+The results are generally accurate. For a practical demonstration, visit our [live demo](https://romanyanke.github.io/daynight/).
+
+## Browser Compatibility
+
+"Day or Night" relies on the Internationalization API for timezone detection. For browser compatibility details, please refer to [Can I Use](https://caniuse.com/#feat=internationalization).
 
 ## Installation
 
+Install "Day or Night" using npm with the following command:
+
 ```sh
-npm install daynight --save-dev
+npm install daynight --save
 ```
 
 ## Usage
+
+Basic usage involves importing the daynight function and calling it to determine if it's light or dark:
 
 ```js
 import daynight from 'daynight'
@@ -24,7 +32,9 @@ import daynight from 'daynight'
 const isLight = daynight().light
 ```
 
-You can pass the time zone name and/or date as options. By default, it's the user's time zone and current date.
+## Advanced Usage
+
+You can customize the function by passing a specific timezone and/or date:
 
 ```js
 daynight({
@@ -33,30 +43,34 @@ daynight({
 })
 ```
 
-The script fails when:
+## Limitations
 
-- Browser doesn't support Internationalization API
-- Timezone is not found in the list of timezones.
+The script will not function correctly under the following conditions:
 
-## Result
+- The browser lacks support for the Internationalization API.
+- The specified timezone is not recognized in the timezone list.
+
+## Output Structure
+
+The function returns an object with the following structure:
 
 ```typescript
 {
-  coordinates: [number, number]
-  dark: boolean
-  light: boolean
-  sunrise: Date
-  sunset: Date
-  timezone: string
-  brightness: number
+  coordinates: [number, number],
+  dark: boolean,
+  light: boolean,
+  sunrise: Date,
+  sunset: Date,
+  timezone: string,
+  brightness: number,
   theme: 'day' | 'night'
 }
 ```
 
-## Brightness
+## Brightness Calculation
 
-Brightness is a value between 0 and 1. Zero is the darkest value, and 1 is the most bright one. The brightness is 0.5 at sunrise and sunset.
+The `brightness` value ranges from 0 (darkest) to 1 (brightest). It is set to 0.5 at both sunrise and sunset.
 
-## Changelog
+## Updates and Changes
 
-See [Changelog.md](CHANGELOG.md).
+Stay updated with the latest changes and improvements by checking our [Changelog.md](CHANGELOG.md).
