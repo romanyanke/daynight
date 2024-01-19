@@ -19,7 +19,6 @@
     "build": "rm -rf dist && rollup -c",
     "preversion": "npm run build",
     "start": "rollup -c -w",
-    "release": "standard-version",
     "demo": "terser dist/daynight.js -o docs/daynight.min.js --comments false"
   },
   "keywords": [
@@ -43,7 +42,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.33.0",
     "rollup-plugin-url": "^3.0.1",
-    "standard-version": "^9.5.0",
     "terser": "^5.15.0",
     "ts-jest": "^28.0.8",
     "typescript": "^4.8.2"
