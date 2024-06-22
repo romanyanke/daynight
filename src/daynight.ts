@@ -1,8 +1,20 @@
-import tz from './timezones'
+import { timezones as tz } from './timezones'
 import sun from './sun'
 import { getBrightness } from './brightness'
 
-const timeZones = tz as Record<string, [number, number]>
+interface Coordinates {
+  [index: number]: number
+}
+
+interface TimeZoneRegion {
+  [city: string]: Coordinates | TimeZoneRegion
+}
+
+interface TimeZones {
+  [region: string]: TimeZoneRegion
+}
+
+const timezones = tz as TimeZones
 
 export type Daynight = (options?: DaynightOptions) => DaynightResult
 export interface DaynightOptions {
@@ -10,7 +22,7 @@ export interface DaynightOptions {
    * Force the timezone for the calculation
    * See [Advanced Usage][https://github.com/romanyanke/daynight#advanced-usage]
    */
-  timeZone?: string
+  timezone?: string
   /**
    * Force the date for the calculation
    * See [Advanced Usage][https://github.com/romanyanke/daynight#advanced-usage]
@@ -56,16 +68,16 @@ export interface DaynightResult {
   sunrise: Date
 }
 
-const daynight: Daynight = config => {
+export const daynight: Daynight = config => {
   const options = {
     ...getDefaultOptions(),
     ...config,
   }
 
-  const coordinates = getTimeZoneCoordinates(options.timeZone)
+  const coordinates = getTimeZoneCoordinates(options.timezone)
 
   if (!coordinates) {
-    throw new Error(`Timezone "${options.timeZone}" not found`)
+    throw new Error(`Timezone "${options.timezone}" not found`)
   }
 
   const [lon, lat] = coordinates
@@ -83,16 +95,25 @@ const daynight: Daynight = config => {
     sunrise,
     sunset,
     theme,
-    timezone: options.timeZone,
+    timezone: options.timezone,
   }
 }
 
 const getDefaultOptions = (): Required<DaynightOptions> => ({
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   date: new Date(),
 })
 
-const getTimeZoneCoordinates = (timeZone: string): [number, number] | undefined =>
-  timeZones[timeZone]
+const getTimeZoneCoordinates = (timezone: string): [number, number] | undefined => {
+  const path = timezone.split('/')
+  // find by parts in the timeZone
 
-export default daynight
+  let region: any = timezones
+  for (const part of path) {
+    if (typeof region === 'object') {
+      region = region[part]
+    }
+  }
+
+  return region
+}

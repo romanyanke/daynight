@@ -1,0 +1,83 @@
+.sky {
+  --angle: 170deg;
+
+  user-select: none;
+  z-index: -1;
+  font-size: 3em;
+  min-height: 100dvh;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+  transform: translateZ(0);
+}
+
+.moon,
+.sun {
+  position: absolute;
+  top: 5px;
+  bottom: 0;
+  transition: all 0.25s linear;
+  transform: translateX(-50%);
+  animation-duration: var(--day-length);
+  animation-timing-function: linear;
+  animation-delay: 0s;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+.day .sun {
+  animation-name: sunrise;
+}
+.day .moon {
+  animation-name: dawn;
+}
+.night .sun {
+  animation-name: sunset;
+}
+.night .moon {
+  animation-name: dusk;
+}
+
+@keyframes sunrise {
+  from {
+    transform: translateX(-50%) rotate(calc(-1 * var(--angle)));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) rotate(0deg);
+    opacity: 1;
+  }
+}
+@keyframes sunset {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50%) rotate(var(--angle));
+    opacity: 0;
+  }
+}
+@keyframes dawn {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50%) rotate(var(--angle));
+    opacity: 0;
+  }
+}
+@keyframes dusk {
+  from {
+    transform: translateX(-50%) rotate(calc(-1 * var(--angle)));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) rotate(0deg);
+    opacity: 1;
+  }
+}

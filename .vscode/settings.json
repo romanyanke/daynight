@@ -1,6 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.exclude": {
-    "generator/combined.json": true
+    "scripts/combined.json": true
   }
 }

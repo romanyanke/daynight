@@ -1,0 +1,19 @@
+{
+  "name": "daynight.demo",
+  "version": "1.0.0",
+  "source": "src/index.html",
+  "browserslist": "> 2%, last 2 versions, not dead",
+  "scripts": {
+    "start": "rm -rf dist && parcel -p 3000",
+    "build": "rm -rf dist && parcel build --no-cache",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "parcel": "^2.12.0",
+    "daynight": "file:../dist"
+  }
+}
