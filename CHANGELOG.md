@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.1
+
+- Trying to fix a missing README on npmjs.com
+
 ## 4.0.0
 
 - Rename the `timezone` option.
