@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+    />
+    <meta name="description" content="daynight.js demo" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#150708" />
+    <title>DayNight</title>
+    <style>
+      @import './app.css';
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1><span class="day">Day</span><span class="night">Night</span></h1>
+      <p>
+        <a href="https://www.npmjs.com/package/daynight">npm</a> |
+        <a href="https://github.com/romanyanke/daynight">GitHub</a>
+      </p>
+      <p id="info"></p>
+      <p id="map"></p>
+      <div class="sky" aria-hidden="true">
+        <span class="sun">🌞</span>
+        <span class="moon">🌛</span>
+      </div>
+    </main>
+
+    <script type="module">
+      import './app.ts'
+    </script>
+  </body>
+</html>

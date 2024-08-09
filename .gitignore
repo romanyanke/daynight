@@ -2,3 +2,4 @@ dist/
 combined.json
 cached.json
 coverage
+build

@@ -1,7 +1,5 @@
 # 🌞 Day or Night 🌚
 
-## Overview
-
 "Day or Night" is a lightweight JavaScript utility designed to determine whether it is currently day or night in the user's location. Remarkably, this script accomplishes its task without requesting the user's location, relying on IP addresses, or utilizing advanced web features like `DeviceLightEvent` or light-level CSS media queries.
 
 ## How It Works
@@ -38,7 +36,7 @@ You can customize the function by passing a specific timezone and/or date:
 
 ```js
 daynight({
-  timeZone: 'Africa/Nairobi',
+  timezone: 'Africa/Nairobi',
   date: new Date('2012-12-20T12:00'),
 })
 ```

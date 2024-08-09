@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.0.0
+
+- Rename the `timezone` option.
+
+```diff
+      daynight({
+-        timeZone: 'Australia/Sydney',
++        timezone: 'Australia/Sydney',
+      }),
+```
+
+- Update the [demo](https://romanyanke.github.io/daynight/).
+- Generate CJS, ESM modules and type declarations.
+
 ## 3.3.1
 
 - Update TypeScript types and Readme.md
