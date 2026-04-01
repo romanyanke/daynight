@@ -1,4 +1,4 @@
-import { timezones as tz } from './timezones'
+import { timezones as tz } from './timeZones'
 import sun from './sun'
 import { getBrightness } from './brightness'
 
