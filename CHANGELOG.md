@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2
+
+- Dependabot alerts, audit fix and update dependencies.
+
 ## 4.0.1
 
 - Trying to fix a missing README on npmjs.com
