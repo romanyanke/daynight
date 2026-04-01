@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.3
+
+- Fix a missing README on npmjs.com. This should not affect the installation or usage of the package.
+
 ## 4.0.2
 
 - Dependabot alerts, audit fix and update dependencies.
