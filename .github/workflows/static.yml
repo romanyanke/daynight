@@ -37,9 +37,15 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library
+        run: npm run build
+
       - name: Install dependencies in demo
         working-directory: demo
-        run: npm install daynight@latest -D
+        run: npm install
 
       - name: Build demo
         working-directory: demo

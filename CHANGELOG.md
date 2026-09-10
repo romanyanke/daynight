@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.0.4
+
+Tooling and CI only. The published library code is unchanged.
+
+- Update dev dependencies: vitest 4.1.11 and prettier 3.9.6. Clears all npm audit advisories.
+- Fix the CI Node version. Both workflows ran Node 16, which vitest 4 does not support, so `npm test` would have failed on release.
+- Remove a dead `rollup.config.js`. The build has been running on `tsc`, and none of the plugins it imported were installed.
+- Add an `npm run format` script and a `.prettierignore`.
+- Build the [demo](https://romanyanke.github.io/daynight/) from source instead of installing `daynight@latest` from npm, so the published demo matches `main`.
+
 ## 4.0.3
 
 - Fix a missing README on npmjs.com. This should not affect the installation or usage of the package.
