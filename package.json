@@ -8,6 +8,7 @@
   "scripts": {
     "generate": "node scripts/generate.mjs",
     "test": "vitest run",
+    "format": "prettier --write .",
     "build:cjs": "tsc --module CommonJS --outDir dist/cjs --declarationDir dist/types",
     "build:esm": "tsc --module ESNext --outDir dist/esm --declarationDir dist/types",
     "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
@@ -24,9 +25,9 @@
   "license": "MIT",
   "devDependencies": {
     "jsts": "2.12.1",
-    "prettier": "3.8.1",
+    "prettier": "3.9.6",
     "typescript": "6.0.2",
-    "vitest": "4.1.0"
+    "vitest": "4.1.11"
   },
   "repository": {
     "type": "git",
