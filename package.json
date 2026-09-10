@@ -13,6 +13,7 @@
     "build:esm": "tsc --module ESNext --outDir dist/esm --declarationDir dist/types",
     "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
     "build": "rm -rf dist && npm run build:cjs && npm run build:esm && npm run build:types",
+    "prepublishOnly": "npm run build",
     "start": "tsc --watch"
   },
   "keywords": [

@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.5
+
+- Fix a broken `4.0.4` tarball. It was published without a build, so it shipped no `dist/` at all and any `import 'daynight'` failed to resolve. Add a `prepublishOnly` script that runs `npm run build`, so the build can no longer be skipped on publish.
+
 ## 4.0.4
 
 Tooling and CI only. The published library code is unchanged.
