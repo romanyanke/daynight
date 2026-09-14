@@ -123,6 +123,28 @@ describe('timezone coordinates', () => {
   })
 })
 
+describe('sunrise/sunset/brightness values (not just light/dark)', () => {
+  it('computes the exact sunrise and sunset instants for a known date/location', () => {
+    const result = daynight({
+      timezone: 'Africa/Abidjan',
+      date: new Date('2015-06-15T12:00Z'),
+    })
+
+    expect(result.sunrise.toISOString()).toBe('2015-06-15T06:06:00.000Z')
+    expect(result.sunset.toISOString()).toBe('2015-06-15T18:39:00.000Z')
+  })
+
+  it('is 0.5 exactly at the sunrise and sunset instants, by definition', () => {
+    const atNoon = daynight({
+      timezone: 'Africa/Abidjan',
+      date: new Date('2015-06-15T12:00Z'),
+    })
+
+    expect(daynight({ timezone: 'Africa/Abidjan', date: atNoon.sunrise }).brightness).toBe(0.5)
+    expect(daynight({ timezone: 'Africa/Abidjan', date: atNoon.sunset }).brightness).toBe(0.5)
+  })
+})
+
 describe('Errors', () => {
   describe('timezone is incorrect', () => {
     it('should return an error', () => {

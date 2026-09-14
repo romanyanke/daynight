@@ -1,0 +1,27 @@
+# Runs on every push and pull request, unlike the publish workflows which
+# only run tests as a release gate. Matrixed across a few timezones because
+# the library previously depended on the host machine's local timezone (see
+# CHANGELOG 4.1.0) - this is a regression guard for that class of bug.
+name: Test
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tz: [UTC, America/New_York, Asia/Tokyo, Pacific/Kiritimati]
+    env:
+      TZ: ${{ matrix.tz }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
