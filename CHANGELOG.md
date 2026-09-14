@@ -8,8 +8,9 @@
 - Regenerated the coordinate table from timezone-boundary-builder 2026c, which adds `America/Coyhaique` (tzdata 2025a). All 418 zones `Intl.supportedValuesOf('timeZone')` reports now resolve, up from 398.
 - **Fix: white nights reported local noon as night.** Sunrise and sunset are found by scanning a single local calendar day. Just south of the Arctic circle in June the sun sets after midnight and rises again an hour or two later, so the sunset found on that day belongs to the night that began the day before and lands _before_ that day's sunrise — making `date > sunset` true at local noon. The sunset is now carried to the day it actually belongs to. On the previous release this affected eight zones on the June solstice, `Atlantic/Reykjavik`, `America/Anchorage` and `America/Nome` among them.
 - **Performance: cache `Intl.DateTimeFormat` instances by zone.** Two formatters were constructed on every call, which dominated the cost. A pass over every timezone went from 25.4ms to 10.4ms — and that is 418 zones now against 398 before.
-- Bundle: 12704 → 13365 bytes raw, 6655 → 6956 gzipped.
+- Bundle: 12704 → 13417 bytes raw, 6655 → 6980 gzipped.
 - Fixed the `scripts/generate.mjs` pipeline, which could not run as documented: its JSON imports used `assert { type: 'json' }` (dropped in Node 22), reported as a missing `combined.json`, and the first run returned nothing instead of the table it had just computed, so it only worked when invoked twice.
+- Rebuilt the [demo](https://romanyanke.github.io/daynight/) as a landing page. It plots every timezone on a world map, each dot coloured by the `brightness` reported for it, and a time slider sweeps the day/night line across — 418 real `daynight()` calls per frame, which is also how these fixes were found. The visitor's own result leads the page, shown as the chain that produced it rather than a bare verdict. The old page's Yandex static-maps image is gone, and with it a third-party request carrying the user's coordinates.
 - Fixed a leak in the test suite: the "Intl is not supported" case stubbed out `global.Intl` without restoring it, failing any test declared after it.
 
 ## 4.1.0
