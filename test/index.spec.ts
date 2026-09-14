@@ -119,7 +119,7 @@ describe('timezone coordinates', () => {
         timezone: 'Africa/Abidjan',
         date: new Date('2015-06-15T12:00Z'),
       }),
-    ).toMatchObject({ coordinates: [-5.5, 7.5] })
+    ).toMatchObject({ coordinates: [-5.7, 7.5] })
   })
 })
 
@@ -131,7 +131,7 @@ describe('sunrise/sunset/brightness values (not just light/dark)', () => {
     })
 
     expect(result.sunrise.toISOString()).toBe('2015-06-15T06:06:00.000Z')
-    expect(result.sunset.toISOString()).toBe('2015-06-15T18:39:00.000Z')
+    expect(result.sunset.toISOString()).toBe('2015-06-15T18:40:00.000Z')
   })
 
   it('is 0.5 exactly at the sunrise and sunset instants, by definition', () => {
@@ -175,6 +175,32 @@ describe('Errors', () => {
     it('should return an error', () => {
       expect(() => daynight()).toThrow(TypeError)
     })
+  })
+})
+
+describe('timezone centre points are plausible', () => {
+  // Guards the generator: taking the centroid of a whole MultiPolygon used to
+  // drop Australia/Perth at [133.5, -64.6], in the Southern Ocean, because
+  // the Australian Antarctic Territory keeps Perth's time and outweighs
+  // Western Australia. Anyone actually in Perth got a badly wrong sunrise.
+  it.each([
+    ['Australia/Perth', -35, -15],
+    ['America/Argentina/Ushuaia', -57, -50],
+    ['Europe/London', 48, 60],
+    ['Asia/Tokyo', 30, 42],
+  ])('puts %s between %i and %i degrees of latitude', (timezone, min, max) => {
+    const [, lat] = daynight({ timezone }).coordinates
+
+    expect(lat).toBeGreaterThan(min)
+    expect(lat).toBeLessThan(max)
+  })
+
+  it('keeps zones outside Antarctica out of Antarctica', () => {
+    const outsideAntarctica = ['Australia/Perth', 'America/Argentina/Ushuaia', 'Pacific/Auckland']
+
+    for (const timezone of outsideAntarctica) {
+      expect(daynight({ timezone }).coordinates[1]).toBeGreaterThan(-60)
+    }
   })
 })
 
