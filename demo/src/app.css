@@ -1,13 +1,32 @@
 @import './styles/sky.css';
+@import './styles/map.css';
 
 .day {
   --background: #f1eded;
   --text: #2c2d30;
-  --caption: #333;
+  --caption: #55565a;
   --link: #1264a3;
   --link-hover: #0b4c8c;
   --delimiter: #949494;
   --image-filter: none;
+  --accent: #c2741f;
+
+  --surface: #fffdfd;
+  --surface-edge: #ded8d8;
+
+  --map-sea: #dfe5ea;
+  --map-edge: #c9c3c3;
+  --map-land: #c3c9c2;
+  --map-land-edge: #a8aea7;
+
+  --dot-day: #ffc65c;
+  --dot-night: #2f3d5c;
+  --dot-focus: #2c2d30;
+  --dot-polar: #7fd4ff;
+  --dot-home: #e2452f;
+
+  --tooltip-bg: #2c2d30;
+  --tooltip-text: #f1eded;
 }
 
 .night {
@@ -18,54 +37,43 @@
   --link-hover: #ff9c52;
   --delimiter: #808080;
   --image-filter: brightness(0.85);
-}
+  --accent: #e88030;
 
-main {
-  width: var(--base-width);
-  height: var(--base-width);
-  box-sizing: border-box;
-  padding-top: 3em;
-  position: relative;
-  text-align: center;
-  text-wrap: balance;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-}
+  --surface: #1e1011;
+  --surface-edge: #33221f;
 
-h1 span {
-  opacity: 0.4;
-}
-.day h1 .day,
-.night h1 .night {
-  opacity: 1;
-}
-p {
-  font-size: 2rem;
+  --map-sea: #0b1220;
+  --map-edge: #33221f;
+  --map-land: #2a3142;
+  --map-land-edge: #3c445a;
+
+  --dot-day: #ffd479;
+  --dot-night: #1b2436;
+  --dot-focus: #ffffe0;
+  --dot-polar: #7fd4ff;
+  --dot-home: #ff6b4a;
+
+  --tooltip-bg: #ffffe0;
+  --tooltip-text: #150708;
 }
 
 body {
-  --base-width: min(100vw, 100vh);
   --transition-options: ease-out 0.15s;
-
   --day-length: 0.6s;
+
   background-color: var(--background);
   margin: 0;
-
   color: var(--text);
-  font-size: 1.1em;
-  line-height: 1.33;
+  font-size: 1.05em;
+  line-height: 1.5;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
     'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  transition: all var(--transition-options);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition:
+    background-color var(--transition-options),
+    color var(--transition-options);
 }
 
 a {
@@ -78,10 +86,238 @@ a:hover {
   color: var(--link-hover);
 }
 
-#map {
-  flex: 1;
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
 }
-#map img {
-  border-radius: 50%;
-  max-width: 100%;
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+/* Hero */
+.hero {
+  padding: 4.5rem 0 2rem;
+  text-align: center;
+}
+
+.hero__title {
+  font-size: clamp(2.5rem, 9vw, 4rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.hero__title span {
+  opacity: 0.4;
+  transition: opacity var(--transition-options);
+}
+
+.day .hero__title .day,
+.night .hero__title .night {
+  opacity: 1;
+}
+
+.hero__tagline {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  color: var(--caption);
+  margin: 0.5rem auto 1rem;
+  max-width: 32em;
+  text-wrap: balance;
+}
+
+.hero__links {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Sections */
+.section {
+  margin: 3.5rem 0 0;
+}
+
+.section__heading {
+  font-size: 1.35rem;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.section__lede,
+.section__note {
+  color: var(--caption);
+  margin: 0 0 1rem;
+  max-width: 44em;
+}
+
+.section__note {
+  font-size: 0.9rem;
+  margin: 1rem 0 0;
+}
+
+/* Personal result */
+.personal {
+  background: var(--surface);
+  border: 1px solid var(--surface-edge);
+  border-radius: 0.75rem;
+  padding: 1.1rem 1.25rem;
+}
+
+.personal__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: 0.15rem 1rem;
+  padding: 0.3rem 0;
+  align-items: baseline;
+}
+
+.personal__label {
+  color: var(--caption);
+  font-size: 0.88rem;
+}
+
+.personal__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.personal__note {
+  grid-column: 2;
+  font-size: 0.78rem;
+  color: var(--caption);
+  opacity: 0.8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.personal__verdict {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--surface-edge);
+  font-size: 1.15rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+}
+
+.personal__brightness {
+  font-size: 0.85rem;
+  color: var(--caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.personal__privacy,
+.personal__failure {
+  margin: 0.8rem 0 0;
+  font-size: 0.85rem;
+  color: var(--caption);
+}
+
+/* Steps */
+.steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.steps__item {
+  color: var(--caption);
+}
+
+.steps__item b {
+  color: var(--text);
+  display: block;
+}
+
+/* Snippet */
+.snippet {
+  position: relative;
+}
+
+.snippet__code {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-edge);
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.snippet__copy {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.25em 0.7em;
+  border-radius: 0.35em;
+  border: 1px solid var(--surface-edge);
+  background: var(--background);
+  color: var(--link);
+  cursor: pointer;
+}
+
+/* API */
+.api__install {
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-edge);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.api {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.api__caption {
+  text-align: left;
+  color: var(--caption);
+  padding-bottom: 0.5rem;
+}
+
+.api th,
+.api td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: 0.45rem 0.9rem 0.45rem 0;
+  border-top: 1px solid var(--surface-edge);
+  font-weight: normal;
+}
+
+.api td:last-child {
+  color: var(--caption);
+}
+
+.footer {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--surface-edge);
+  font-size: 0.82rem;
+  color: var(--caption);
+  text-align: center;
+}
+
+@media (max-width: 34rem) {
+  .personal__row {
+    grid-template-columns: 1fr;
+  }
+  .personal__note {
+    grid-column: 1;
+  }
+  .hero {
+    padding-top: 3rem;
+  }
 }

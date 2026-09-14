@@ -7,6 +7,8 @@
   "types": "dist/types/index.d.ts",
   "scripts": {
     "generate": "node scripts/generate.mjs",
+    "generate:land": "node scripts/generate-land.mjs",
+    "generate:zones": "node scripts/generate-zones.mjs",
     "test": "vitest run",
     "format": "prettier --write .",
     "build:cjs": "esbuild src/index.ts --bundle --minify --sourcemap --target=es2018 --format=cjs --platform=node --outfile=dist/cjs/index.js",

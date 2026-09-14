@@ -2,10 +2,10 @@
   --angle: 170deg;
 
   user-select: none;
-  z-index: -1;
+  z-index: 0;
   font-size: 3em;
-  min-height: 100dvh;
-  position: absolute;
+  height: 100dvh;
+  position: fixed;
   inset: 0;
   overflow: hidden;
   text-align: center;
