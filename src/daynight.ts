@@ -74,12 +74,15 @@ export const daynight: Daynight = config => {
     ...config,
   }
 
-  const coordinates = getTimeZoneCoordinates(options.timezone)
+  const quantizedCoordinates = getTimeZoneCoordinates(options.timezone)
 
-  if (!coordinates) {
+  if (!quantizedCoordinates) {
     throw new Error(`Timezone "${options.timezone}" not found`)
   }
 
+  // Coordinates are stored as degrees * 10 (see src/timeZones.ts) to keep the
+  // data file small.
+  const coordinates: [number, number] = [quantizedCoordinates[0] / 10, quantizedCoordinates[1] / 10]
   const [lon, lat] = coordinates
   const { sunrise, sunset } = sun(options.date, lon, lat)
   const brightness = getBrightness([sunrise, sunset])(options.date)
@@ -115,5 +118,5 @@ const getTimeZoneCoordinates = (timezone: string): [number, number] | undefined 
     }
   }
 
-  return region
+  return Array.isArray(region) ? (region as [number, number]) : undefined
 }

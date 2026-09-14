@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.0
+
+- Shrink the runtime bundle (`dist/esm/index.js`): −34% raw, −17% gzip, −20% brotli.
+  - Store timezone coordinates as integer degrees ×10 instead of one-decimal floats (e.g. `-603` instead of `-60.3`), halved back on read. A binary+base64 packing was tried first but rejected: it shrank the raw file yet compressed worse than gzip/brotli-friendly decimal text, making the real (compressed) transfer size larger.
+  - Switch `build:cjs`/`build:esm` from raw `tsc` (5 unminified files per target) to a single minified `esbuild` bundle per target. `.d.ts` generation is unchanged (`tsc --emitDeclarationOnly`), and source maps are still generated and published.
+  - Fix `scripts/generate.mjs` writing to `src/timezones.ts` (lowercase `z`) while `src/daynight.ts` imports `./timeZones` — silently broken on case-sensitive filesystems (e.g. Linux CI).
+  - `daynight({ timezone: 'Africa' })` (a region without a leaf city) now throws the documented `Timezone "..." not found` error instead of an unhandled `TypeError`.
+
 ## 4.0.5
 
 - Fix a broken `4.0.4` tarball. It was published without a build, so it shipped no `dist/` at all and any `import 'daynight'` failed to resolve. Add a `prepublishOnly` script that runs `npm run build`, so the build can no longer be skipped on publish.
