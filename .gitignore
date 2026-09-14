@@ -1,5 +1,6 @@
 dist/
 combined.json
 cached.json
+ne_110m_land.geojson
 coverage
 build

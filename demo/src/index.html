@@ -6,28 +6,143 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
     />
-    <meta name="description" content="daynight.js demo" />
+    <meta
+      name="description"
+      content="daynight tells you whether it is day or night where your user is — without asking for their location, without an IP lookup, in 6.9 KB."
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#150708" />
-    <title>DayNight</title>
+    <title>DayNight — is it light or dark where your user is?</title>
     <style>
       @import './app.css';
     </style>
   </head>
 
   <body>
-    <main>
-      <h1><span class="day">Day</span><span class="night">Night</span></h1>
-      <p>
-        <a href="https://www.npmjs.com/package/daynight">npm</a> |
-        <a href="https://github.com/romanyanke/daynight">GitHub</a>
-      </p>
-      <p id="info"></p>
-      <p id="map"></p>
-      <div class="sky" aria-hidden="true">
-        <span class="sun">🌞</span>
-        <span class="moon">🌛</span>
-      </div>
+    <div class="sky" aria-hidden="true">
+      <span class="sun">🌞</span>
+      <span class="moon">🌛</span>
+    </div>
+
+    <main class="page">
+      <header class="hero">
+        <h1 class="hero__title"><span class="day">Day</span><span class="night">Night</span></h1>
+        <p class="hero__tagline">
+          Is it light or dark where your user is? Find out without asking them, in 6.9&nbsp;KB.
+        </p>
+        <p class="hero__links">
+          <a href="https://www.npmjs.com/package/daynight">npm</a>
+          <a href="https://github.com/romanyanke/daynight">GitHub</a>
+          <a href="https://github.com/romanyanke/daynight/blob/main/CHANGELOG.md">Changelog</a>
+        </p>
+      </header>
+
+      <section class="section section--personal" aria-labelledby="you">
+        <h2 class="section__heading" id="you">You, right now</h2>
+        <div data-personal></div>
+      </section>
+
+      <section class="section section--map" aria-labelledby="world">
+        <h2 class="section__heading" id="world">…and everyone else</h2>
+        <p class="section__lede">
+          Every timezone the library knows, lit by the <code>brightness</code> it reports for it.
+          Drag the slider and the line between day and night moves — drawn by
+          <code>daynight()</code> alone, one call per dot, recomputed for every frame.
+        </p>
+
+        <div class="map" data-map></div>
+        <p class="stats" data-stats></p>
+        <div data-controls></div>
+      </section>
+
+      <section class="section" aria-labelledby="how">
+        <h2 class="section__heading" id="how">How it works</h2>
+        <ol class="steps">
+          <li class="steps__item">
+            <b>Ask the browser for its timezone.</b>
+            <code>Intl.DateTimeFormat().resolvedOptions().timeZone</code> returns something like
+            <code>Europe/Madrid</code>. No prompt, no permission, no network.
+          </li>
+          <li class="steps__item">
+            <b>Look up the centre of that zone.</b>
+            A table of 418 zones, computed from real timezone boundaries and quantised to tenths of
+            a degree to stay small.
+          </li>
+          <li class="steps__item">
+            <b>Work out the sun from there.</b>
+            Sunrise and sunset for those coordinates and that date, then whether the given moment
+            falls between them.
+          </li>
+        </ol>
+        <p class="section__note">
+          So the answer is an estimate for the middle of a timezone, not for a person. That is the
+          trade: no geolocation prompt, no IP lookup, no third-party request — in exchange for being
+          approximate at the edges of a zone.
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="code">
+        <h2 class="section__heading" id="code">The call being made right now</h2>
+        <p class="section__lede">This tracks the slider, and follows whichever dot you point at.</p>
+        <div data-snippet></div>
+      </section>
+
+      <section class="section" aria-labelledby="api">
+        <h2 class="section__heading" id="api">API</h2>
+        <pre class="api__install"><code>npm install daynight</code></pre>
+        <table class="api">
+          <caption class="api__caption">
+            <code>daynight(options?)</code>
+            returns:
+          </caption>
+          <tbody>
+            <tr>
+              <th><code>theme</code></th>
+              <td><code>'day' | 'night'</code></td>
+              <td>Ready to put on an element as a class.</td>
+            </tr>
+            <tr>
+              <th><code>light</code> / <code>dark</code></th>
+              <td><code>boolean</code></td>
+              <td>Whether the sun is above or below the horizon.</td>
+            </tr>
+            <tr>
+              <th><code>brightness</code></th>
+              <td><code>number</code></td>
+              <td>0 to 1, exactly 0.5 at sunrise and at sunset.</td>
+            </tr>
+            <tr>
+              <th><code>sunrise</code> / <code>sunset</code></th>
+              <td><code>Date</code></td>
+              <td>Estimated, for the centre of the zone.</td>
+            </tr>
+            <tr>
+              <th><code>polar</code></th>
+              <td><code>'day' | 'night' | null</code></td>
+              <td>Midnight sun or polar night, when there is no sunrise or sunset to report.</td>
+            </tr>
+            <tr>
+              <th><code>timezone</code></th>
+              <td><code>string</code></td>
+              <td>The zone used — the current name, if the one you passed has been renamed.</td>
+            </tr>
+            <tr>
+              <th><code>coordinates</code></th>
+              <td><code>[number, number]</code></td>
+              <td>Longitude and latitude of the zone's centre.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="section__note">
+          Both options are optional: <code>timezone</code> defaults to the browser's own,
+          <code>date</code> to now. Pass either to ask about somewhere else, or some other time —
+          which is all this page is doing.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <p>MIT licensed · click the sky to flip the theme by hand</p>
+      </footer>
     </main>
 
     <script type="module">
