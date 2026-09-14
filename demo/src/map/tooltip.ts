@@ -52,13 +52,27 @@ export const createTooltip = (container: HTMLElement, dots: Dot[]): Tooltip => {
     const box = dot.circle.getBoundingClientRect()
     const bounds = container.getBoundingClientRect()
 
-    // Keep the bubble inside the map. Dots sit as far out as Kiritimati and
-    // Samoa, a few pixels from either edge, and the tooltip is centred on the
-    // dot -- so without clamping it hangs off the page on a phone.
+    // On a phone the map is only a few hundred pixels wide -- narrower than a
+    // line of tooltip text -- so cap the bubble to the map before measuring
+    // it, and let it wrap onto a second line.
+    element.style.maxWidth = `${bounds.width - 8}px`
+
+    // Keep the bubble inside the map, which clips anything that leaves it.
+    // Dots sit as far out as Kiritimati and Samoa, a few pixels from either
+    // edge, and the tooltip is centred on the dot -- so without clamping it
+    // hangs off the side. Above the dot it would likewise be cut off for the
+    // Arctic zones along the top edge, so there it flips underneath.
     const half = element.offsetWidth / 2
     const centre = box.left - bounds.left + box.width / 2
     element.style.left = `${Math.min(Math.max(centre, half + 4), bounds.width - half - 4)}px`
-    element.style.top = `${box.top - bounds.top}px`
+
+    const top = box.top - bounds.top
+    // The bubble is lifted by 125% of its own height (see the transform), so
+    // that -- not its plain height -- is what has to fit above the dot. A
+    // tooltip that wrapped onto two lines needs twice as much room.
+    const below = top < element.offsetHeight * 1.25 + 4
+    element.classList.toggle('map__tooltip--below', below)
+    element.style.top = `${below ? top + box.height : top}px`
   }
 
   const hide = () => {
