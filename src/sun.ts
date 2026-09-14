@@ -16,6 +16,18 @@ const lst = (lon: number, jd: number, z: number) => {
 // returns value for sign of argument
 const sgn = (x: number) => (x > 0 ? 1 : x < 0 ? -1 : 0)
 
+export interface SundownResult {
+  sunrise: Date
+  sunset: Date
+  // 'day' when the sun stays above the horizon for the whole day (midnight
+  // sun), 'night' when it stays below it (polar night), null otherwise.
+  // The upstream sundown reports these as the messages "The sun is
+  // above/under the horizon the whole day"; here they are reported as data so
+  // daynight.ts can special-case them instead of reading a degenerate
+  // sunrise === sunset.
+  polar: 'day' | 'night' | null
+}
+
 export default function sundown(
   d: Date,
   lon: number,
@@ -26,9 +38,11 @@ export default function sundown(
   // because that always reflects the *host machine's* local timezone, not
   // the timezone the caller asked about.
   offsetMinutes: number,
-): { sunrise: Date; sunset: Date } {
+): SundownResult {
   const Rise_time = [0, 0]
   const Set_time = [0, 0]
+  let Sunrise = false
+  let Sunset = false
 
   // let ph
 
@@ -92,12 +106,12 @@ export default function sundown(
     if (VHz[0] < 0 && VHz[2] > 0) {
       Rise_time[0] = hr
       Rise_time[1] = min
-      // Sunrise = true
+      Sunrise = true
     }
     if (VHz[0] > 0 && VHz[2] < 0) {
       Set_time[0] = hr
       Set_time[1] = min
-      // Sunset = true
+      Sunset = true
     }
     return VHz[2]
   }
@@ -198,11 +212,32 @@ export default function sundown(
         offsetMinutes * 60000,
     )
 
+  // After the 24-hour loop VHz[2] holds the sun's altitude at the end of the
+  // day. When neither event fired, its sign tells the two polar cases apart.
+  const polar: SundownResult['polar'] = !Sunrise && !Sunset ? (VHz[2] >= 0 ? 'day' : 'night') : null
+
+  if (polar === 'day') {
+    // Light all day: span the whole local day rather than leaving both
+    // times at midnight, which would read as a zero-length day.
+    Rise_time[0] = 0
+    Rise_time[1] = 0
+    Set_time[0] = 24
+    Set_time[1] = 0
+  } else if (Sunrise && !Sunset) {
+    // The sun rose today but sets after local midnight.
+    Set_time[0] = 24
+    Set_time[1] = 0
+  }
+  // The remaining cases already work with Rise_time/Set_time left at
+  // midnight: a polar night is a zero-length day, and a sun that only sets
+  // today was already up when the day began.
+
   const sunsetTime = zonedDate(Set_time[0], Set_time[1])
   const sunriseTime = zonedDate(Rise_time[0], Rise_time[1])
 
   return {
     sunrise: sunriseTime,
     sunset: sunsetTime,
+    polar,
   }
 }

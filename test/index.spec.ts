@@ -161,12 +161,88 @@ describe('Errors', () => {
   })
 
   describe('Intl is not supported', () => {
+    // Restore Intl afterwards: without this the stub leaks into every test
+    // declared after this one, which fails them with a TypeError about
+    // DateTimeFormat rather than anything to do with what they assert.
+    const realIntl = global.Intl
+
     beforeAll(() => {
       ;(global as any).Intl = undefined
+    })
+    afterAll(() => {
+      global.Intl = realIntl
     })
     it('should return an error', () => {
       expect(() => daynight()).toThrow(TypeError)
     })
+  })
+})
+
+describe('polar day and night', () => {
+  // Svalbard, well inside the Arctic circle: midnight sun in June, polar
+  // night in December. Before the Sunrise/Sunset flags were restored in
+  // sun.ts, both came back as sunrise === sunset === local midnight, so the
+  // midnight sun read as 'night' with a meaningless brightness.
+  it('reports the midnight sun as a full-brightness day', () => {
+    const result = daynight({
+      timezone: 'Arctic/Longyearbyen',
+      date: new Date('2026-06-21T00:00:00Z'),
+    })
+
+    expect(result).toMatchObject({ polar: 'day', light: true, dark: false, brightness: 1 })
+  })
+
+  it('reports the polar night as a zero-brightness night', () => {
+    const result = daynight({
+      timezone: 'Arctic/Longyearbyen',
+      date: new Date('2026-12-21T12:00:00Z'),
+    })
+
+    expect(result).toMatchObject({ polar: 'night', light: false, dark: true, brightness: 0 })
+  })
+
+  it('reports the southern hemisphere the other way round', () => {
+    expect(
+      daynight({ timezone: 'Antarctica/McMurdo', date: new Date('2026-06-21T12:00:00Z') }),
+    ).toMatchObject({ polar: 'night' })
+
+    expect(
+      daynight({ timezone: 'Antarctica/McMurdo', date: new Date('2026-12-21T12:00:00Z') }),
+    ).toMatchObject({ polar: 'day' })
+  })
+
+  it('leaves polar null outside the polar circles', () => {
+    expect(
+      daynight({ timezone: 'Europe/Moscow', date: new Date('2026-06-21T12:00:00Z') }),
+    ).toMatchObject({ polar: null })
+  })
+})
+
+describe('renamed timezones', () => {
+  // Which spelling Intl hands back depends on the runtime's ICU version, so
+  // both have to work: on ICU 78 `Intl.supportedValuesOf` still reports
+  // 'Europe/Kiev', which used to throw because the table only has the
+  // current name.
+  it.each([
+    ['Europe/Kiev', 'Europe/Kyiv'],
+    ['Asia/Calcutta', 'Asia/Kolkata'],
+    ['America/Buenos_Aires', 'America/Argentina/Buenos_Aires'],
+    ['Asia/Saigon', 'Asia/Ho_Chi_Minh'],
+    ['Africa/Asmera', 'Africa/Asmara'],
+    ['Pacific/Enderbury', 'Pacific/Kanton'],
+  ])('resolves %s to %s', (legacy, current) => {
+    const date = new Date('2026-09-14T12:00:00Z')
+
+    expect(daynight({ timezone: legacy, date })).toMatchObject({
+      timezone: current,
+      coordinates: daynight({ timezone: current, date }).coordinates,
+    })
+  })
+
+  it('still throws for a name that is no timezone at all', () => {
+    expect(() => daynight({ timezone: 'Mars/Olympus' })).toThrow(
+      'Timezone "Mars/Olympus" not found',
+    )
   })
 })
 
