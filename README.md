@@ -54,6 +54,8 @@ The script will not function correctly under the following conditions:
 - The browser lacks support for the Internationalization API.
 - The specified timezone is not recognized in the timezone list.
 
+Accuracy is also inherently limited by what the library works from: a timezone's centre point, not the user's actual position. A zone can span thousands of kilometres, so sunrise and sunset are estimates for the middle of it — and near the day/night boundary that difference can flip the answer for someone at the zone's edge.
+
 ## Output Structure
 
 The function returns an object with the following structure:
@@ -67,13 +69,30 @@ The function returns an object with the following structure:
   sunset: Date,
   timezone: string,
   brightness: number,
-  theme: 'day' | 'night'
+  theme: 'day' | 'night',
+  polar: 'day' | 'night' | null
 }
 ```
 
 ## Brightness Calculation
 
 The `brightness` value ranges from 0 (darkest) to 1 (brightest). It is set to 0.5 at both sunrise and sunset.
+
+## Polar Day and Night
+
+Inside the polar circles there are days with no sunrise or no sunset at all, and 22 of the timezone centre points sit there. For those days `polar` reports which case it is, and the usual fields follow it:
+
+| `polar`   | meaning                                    | `light` | `brightness` |
+| --------- | ------------------------------------------ | ------- | ------------ |
+| `'day'`   | midnight sun — the sun never sets that day | `true`  | `1`          |
+| `'night'` | polar night — the sun never rises          | `false` | `0`          |
+| `null`    | an ordinary day                            | —       | computed     |
+
+In both polar cases there is no real event for `sunrise`/`sunset` to report: they span the whole local day for `'day'` and collapse to local midnight for `'night'`. Check `polar` rather than comparing the two.
+
+## Renamed Timezones
+
+IANA renames timezones over time (`Europe/Kiev` became `Europe/Kyiv`, `Asia/Calcutta` became `Asia/Kolkata`) and keeps the old names working as aliases. Which spelling a browser reports depends on the ICU version it ships with, so both are accepted — the `timezone` field of the result tells you which name was actually used.
 
 ## Updates and Changes
 

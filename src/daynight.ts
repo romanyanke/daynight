@@ -66,6 +66,14 @@ export interface DaynightResult {
    * Estimated time of sunrise
    */
   sunrise: Date
+  /**
+   * `'day'` during the midnight sun (the sun never sets that day), `'night'`
+   * during the polar night (it never rises), `null` the rest of the time.
+   * In both polar cases `sunrise`/`sunset` have no real event to report:
+   * they span the whole local day for `'day'` and collapse to local midnight
+   * for `'night'`. Use this field rather than comparing them.
+   */
+  polar: 'day' | 'night' | null
 }
 
 export const daynight: Daynight = config => {
@@ -74,20 +82,34 @@ export const daynight: Daynight = config => {
     ...config,
   }
 
-  const quantizedCoordinates = getTimeZoneCoordinates(options.timezone)
+  const timezone = resolveTimeZone(options.timezone)
 
-  if (!quantizedCoordinates) {
+  if (!timezone) {
     throw new Error(`Timezone "${options.timezone}" not found`)
   }
+
+  const quantizedCoordinates = getTimeZoneCoordinates(timezone)!
 
   // Coordinates are stored as degrees * 10 (see src/timeZones.ts) to keep the
   // data file small.
   const coordinates: [number, number] = [quantizedCoordinates[0] / 10, quantizedCoordinates[1] / 10]
   const [lon, lat] = coordinates
-  const offsetMinutes = getTimeZoneOffsetMinutes(options.date, options.timezone)
-  const { sunrise, sunset } = sun(options.date, lon, lat, offsetMinutes)
-  const brightness = getBrightness([sunrise, sunset])(options.date)
-  const dark = options.date < sunrise || options.date > sunset
+  const offsetMinutes = getTimeZoneOffsetMinutes(options.date, timezone)
+  const { sunrise, sunset, polar } = sun(options.date, lon, lat, offsetMinutes)
+
+  // Inside the polar circles there is no sunrise/sunset to interpolate
+  // between, so brightness is decided by the case itself. Feeding these
+  // through getBrightness() would divide by a zero-length day and return a
+  // meaningless value (e.g. 0.42 for Longyearbyen at the height of the
+  // midnight sun).
+  const dark =
+    polar === 'day'
+      ? false
+      : polar === 'night'
+        ? true
+        : options.date < sunrise || options.date > sunset
+  const brightness =
+    polar === 'day' ? 1 : polar === 'night' ? 0 : getBrightness([sunrise, sunset])(options.date)
   const light = !dark
   const theme: DaynightTheme = dark ? 'night' : 'day'
 
@@ -96,10 +118,11 @@ export const daynight: Daynight = config => {
     coordinates,
     dark,
     light,
+    polar,
     sunrise,
     sunset,
     theme,
-    timezone: options.timezone,
+    timezone,
   }
 }
 
@@ -117,17 +140,32 @@ const getDefaultOptions = (): Required<DaynightOptions> => ({
 const getTimeZoneOffsetMinutes = (date: Date, timezone: string): number =>
   (asUTCMillis(date, 'UTC') - asUTCMillis(date, timezone)) / 60000
 
+// Constructing an Intl.DateTimeFormat is by far the most expensive part of a
+// daynight() call, and every call needs the same two formatters ('UTC' and
+// the requested zone). Cached by zone name, which is what makes bulk use
+// (e.g. computing every timezone at once) practical.
+const formatters = new Map<string, Intl.DateTimeFormat>()
+
+const getFormatter = (timezone: string): Intl.DateTimeFormat => {
+  let formatter = formatters.get(timezone)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour12: false,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    formatters.set(timezone, formatter)
+  }
+  return formatter
+}
+
 const asUTCMillis = (date: Date, timezone: string): number => {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    hour12: false,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).formatToParts(date)
+  const parts = getFormatter(timezone).formatToParts(date)
   const get = (type: string) =>
     Number(parts.find((part: Intl.DateTimeFormatPart) => part.type === type)?.value)
   return Date.UTC(
@@ -138,6 +176,58 @@ const asUTCMillis = (date: Date, timezone: string): number => {
     get('minute'),
     get('second'),
   )
+}
+
+// IANA renames zones over time (Europe/Kiev -> Europe/Kyiv, Asia/Calcutta ->
+// Asia/Kolkata, ...) and keeps the old names working as aliases. Which of the
+// two spellings Intl hands back depends on the ICU version bundled with the
+// runtime, so a table built from one spelling will miss real users on
+// runtimes that prefer the other -- for them daynight() used to throw.
+//
+// Rather than shipping (and having to maintain) an alias table, canonicalise
+// both sides through Intl itself: whichever spelling this runtime prefers, a
+// name and its alias collapse onto the same string. The index is built only
+// when a direct lookup misses, so the common path stays free.
+let canonicalIndex: Map<string, string> | undefined
+
+const canonical = (timezone: string): string | undefined => {
+  try {
+    return new Intl.DateTimeFormat('en-US', { timeZone: timezone }).resolvedOptions().timeZone
+  } catch {
+    return undefined
+  }
+}
+
+const getCanonicalIndex = (): Map<string, string> => {
+  if (!canonicalIndex) {
+    canonicalIndex = new Map()
+    const walk = (region: TimeZoneRegion, path: string[]) => {
+      for (const key of Object.keys(region)) {
+        const value = region[key]
+        const name = [...path, key]
+        if (Array.isArray(value)) {
+          const key = canonical(name.join('/'))
+          if (key) canonicalIndex!.set(key, name.join('/'))
+        } else {
+          walk(value as TimeZoneRegion, name)
+        }
+      }
+    }
+    walk(timezones as TimeZoneRegion, [])
+  }
+  return canonicalIndex
+}
+
+// Returns the name to look coordinates up by, or undefined when the zone is
+// unknown even after alias resolution.
+const resolveTimeZone = (timezone: string): string | undefined => {
+  if (getTimeZoneCoordinates(timezone)) return timezone
+
+  const key = canonical(timezone)
+  if (!key) return undefined
+
+  const resolved = getCanonicalIndex().get(key)
+  return resolved && getTimeZoneCoordinates(resolved) ? resolved : undefined
 }
 
 const getTimeZoneCoordinates = (timezone: string): [number, number] | undefined => {
