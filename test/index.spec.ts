@@ -86,12 +86,29 @@ describe('White night and polar night', () => {
   })
 })
 
+describe('timezone coordinates', () => {
+  it('decodes the quantized [lon, lat] stored in timeZones.ts back to degrees', () => {
+    expect(
+      daynight({
+        timezone: 'Africa/Abidjan',
+        date: new Date('2015-06-15T12:00Z'),
+      }),
+    ).toMatchObject({ coordinates: [-5.5, 7.5] })
+  })
+})
+
 describe('Errors', () => {
   describe('timezone is incorrect', () => {
     it('should return an error', () => {
       expect(() => daynight({ timezone: 'i-am-not-a-tz' })).toThrow(
         'Timezone "i-am-not-a-tz" not found',
       )
+    })
+  })
+
+  describe('timezone points to a region instead of a city', () => {
+    it('should return an error instead of throwing a TypeError', () => {
+      expect(() => daynight({ timezone: 'Africa' })).toThrow('Timezone "Africa" not found')
     })
   })
 

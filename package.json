@@ -9,8 +9,8 @@
     "generate": "node scripts/generate.mjs",
     "test": "vitest run",
     "format": "prettier --write .",
-    "build:cjs": "tsc --module CommonJS --outDir dist/cjs --declarationDir dist/types",
-    "build:esm": "tsc --module ESNext --outDir dist/esm --declarationDir dist/types",
+    "build:cjs": "esbuild src/index.ts --bundle --minify --sourcemap --target=es2018 --format=cjs --platform=node --outfile=dist/cjs/index.js",
+    "build:esm": "esbuild src/index.ts --bundle --minify --sourcemap --target=es2018 --format=esm --outfile=dist/esm/index.js",
     "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
     "build": "rm -rf dist && npm run build:cjs && npm run build:esm && npm run build:types",
     "prepublishOnly": "npm run build",
@@ -25,6 +25,7 @@
   "author": "Roman Yanke <roman@yanke.world>",
   "license": "MIT",
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "jsts": "2.12.1",
     "prettier": "3.9.6",
     "typescript": "6.0.2",
