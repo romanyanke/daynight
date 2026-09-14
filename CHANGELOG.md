@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.1
+
+- No code changes. `4.1.0` was staged on npm (`npm stage publish`) but its staging window expired before it could be approved, and npm permanently reserves version numbers once staged — so it could never be re-staged. Republished as `4.1.1`.
+
 ## 4.1.0
 
 - **Fix: results no longer depend on the host machine's local timezone.** `sun.ts` computed a correction from `Date.prototype.getTimezoneOffset()`, which reflects the *process's own* timezone rather than the requested `timezone` option. Whenever the two differed (e.g. any CI runner set to UTC, computing for `Asia/Novosibirsk` or `Europe/Moscow`), sunrise/sunset — and therefore `light`/`dark` — could come out wrong, especially near sunrise/sunset transitions or white nights. `sun.ts` now takes an explicit UTC offset for the requested timezone (computed via `Intl.DateTimeFormat`) instead of reading the host's own offset, and no longer touches any local (non-UTC) `Date` getter/setter. Verified across several `TZ` values.
