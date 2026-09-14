@@ -86,6 +86,32 @@ describe('White night and polar night', () => {
   })
 })
 
+describe('result is independent of the host machine timezone', () => {
+  it('gives the same result for the same inputs regardless of process.env.TZ', () => {
+    const originalTz = process.env.TZ
+    const input = {
+      timezone: 'Asia/Novosibirsk',
+      date: new Date('2015-07-15T05:15+07:00'),
+    }
+
+    try {
+      process.env.TZ = 'UTC'
+      const inUtc = daynight(input)
+
+      process.env.TZ = 'America/New_York'
+      const inNewYork = daynight(input)
+
+      process.env.TZ = 'Pacific/Kiritimati'
+      const inKiritimati = daynight(input)
+
+      expect(inNewYork).toEqual(inUtc)
+      expect(inKiritimati).toEqual(inUtc)
+    } finally {
+      process.env.TZ = originalTz
+    }
+  })
+})
+
 describe('timezone coordinates', () => {
   it('decodes the quantized [lon, lat] stored in timeZones.ts back to degrees', () => {
     expect(
@@ -94,6 +120,28 @@ describe('timezone coordinates', () => {
         date: new Date('2015-06-15T12:00Z'),
       }),
     ).toMatchObject({ coordinates: [-5.5, 7.5] })
+  })
+})
+
+describe('sunrise/sunset/brightness values (not just light/dark)', () => {
+  it('computes the exact sunrise and sunset instants for a known date/location', () => {
+    const result = daynight({
+      timezone: 'Africa/Abidjan',
+      date: new Date('2015-06-15T12:00Z'),
+    })
+
+    expect(result.sunrise.toISOString()).toBe('2015-06-15T06:06:00.000Z')
+    expect(result.sunset.toISOString()).toBe('2015-06-15T18:39:00.000Z')
+  })
+
+  it('is 0.5 exactly at the sunrise and sunset instants, by definition', () => {
+    const atNoon = daynight({
+      timezone: 'Africa/Abidjan',
+      date: new Date('2015-06-15T12:00Z'),
+    })
+
+    expect(daynight({ timezone: 'Africa/Abidjan', date: atNoon.sunrise }).brightness).toBe(0.5)
+    expect(daynight({ timezone: 'Africa/Abidjan', date: atNoon.sunset }).brightness).toBe(0.5)
   })
 })
 

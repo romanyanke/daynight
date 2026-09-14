@@ -84,7 +84,8 @@ export const daynight: Daynight = config => {
   // data file small.
   const coordinates: [number, number] = [quantizedCoordinates[0] / 10, quantizedCoordinates[1] / 10]
   const [lon, lat] = coordinates
-  const { sunrise, sunset } = sun(options.date, lon, lat)
+  const offsetMinutes = getTimeZoneOffsetMinutes(options.date, options.timezone)
+  const { sunrise, sunset } = sun(options.date, lon, lat, offsetMinutes)
   const brightness = getBrightness([sunrise, sunset])(options.date)
   const dark = options.date < sunrise || options.date > sunset
   const light = !dark
@@ -106,6 +107,38 @@ const getDefaultOptions = (): Required<DaynightOptions> => ({
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   date: new Date(),
 })
+
+// UTC offset, in minutes, of `timezone` at `date` (same sign convention as
+// Date.prototype.getTimezoneOffset(): positive west of UTC). Computed from
+// the requested IANA timezone rather than the host machine's own timezone,
+// since sun.ts previously used `date.getTimezoneOffset()` directly, which
+// silently gave wrong results whenever the process ran in a different
+// timezone than the one being asked about (e.g. in CI).
+const getTimeZoneOffsetMinutes = (date: Date, timezone: string): number =>
+  (asUTCMillis(date, 'UTC') - asUTCMillis(date, timezone)) / 60000
+
+const asUTCMillis = (date: Date, timezone: string): number => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(date)
+  const get = (type: string) =>
+    Number(parts.find((part: Intl.DateTimeFormatPart) => part.type === type)?.value)
+  return Date.UTC(
+    get('year'),
+    get('month') - 1,
+    get('day'),
+    get('hour'),
+    get('minute'),
+    get('second'),
+  )
+}
 
 const getTimeZoneCoordinates = (timezone: string): [number, number] | undefined => {
   const path = timezone.split('/')
