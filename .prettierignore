@@ -5,3 +5,4 @@ scripts/combined.json
 src/timeZones.ts
 package-lock.json
 demo/package-lock.json
+demo/src/map/land.ts
