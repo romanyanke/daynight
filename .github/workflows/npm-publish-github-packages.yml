@@ -37,6 +37,14 @@ jobs:
           node-version: 24
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
+      # GitHub Packages only routes *scoped* package names to
+      # npm.pkg.github.com (see actions/setup-node's generated .npmrc, which
+      # maps `@<owner>:registry=...` rather than the default registry). The
+      # public npm package name ("daynight") is unscoped, so publishing here
+      # unscoped silently falls back to the default registry.npmjs.org with
+      # no auth for it. Scope the name for this job only (ephemeral, not
+      # committed) so it actually targets GitHub Packages.
+      - run: npm pkg set name="@${{ github.repository_owner }}/daynight"
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
