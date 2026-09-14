@@ -1,5 +1,10 @@
-# This workflow runs tests and then publishes the package to the public npm registry
-# via npm Trusted Publishing (OIDC) when a GitHub Release is created.
+# This workflow runs tests and then stages a publish of the package to the
+# public npm registry via npm Trusted Publishing (OIDC) when a GitHub Release
+# is created. The trusted publisher is configured to allow `npm stage publish`
+# only (not a direct `npm publish`), so this never makes a version public by
+# itself - a maintainer must separately run `npm stage approve <stage-id>`
+# (2FA required) to release it. Requires npm CLI >= 11.15.0 (bundled with the
+# Node version below).
 name: Publish to npm
 
 on:
@@ -16,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -31,10 +36,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npm publish --access public
+      - run: npm stage publish --access public
