@@ -1,5 +1,11 @@
 # 🌞 Day or Night 🌚
 
+[![npm version](https://img.shields.io/npm/v/daynight.svg)](https://www.npmjs.com/package/daynight)
+[![npm downloads](https://img.shields.io/npm/dm/daynight.svg)](https://www.npmjs.com/package/daynight)
+[![Tests](https://github.com/romanyanke/daynight/actions/workflows/test.yml/badge.svg)](https://github.com/romanyanke/daynight/actions/workflows/test.yml)
+[![License](https://img.shields.io/npm/l/daynight.svg)](LICENSE)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/daynight)](https://bundlephobia.com/package/daynight)
+
 "Day or Night" is a lightweight JavaScript utility designed to determine whether it is currently day or night in the user's location. Remarkably, this script accomplishes its task without requesting the user's location, relying on IP addresses, or utilizing advanced web features like `DeviceLightEvent` or light-level CSS media queries.
 
 ## How It Works
