@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.1.0
 
 - Shrink the runtime bundle (`dist/esm/index.js`): −34% raw, −17% gzip, −20% brotli.
   - Store timezone coordinates as integer degrees ×10 instead of one-decimal floats (e.g. `-603` instead of `-60.3`), halved back on read. A binary+base64 packing was tried first but rejected: it shrank the raw file yet compressed worse than gzip/brotli-friendly decimal text, making the real (compressed) transfer size larger.
