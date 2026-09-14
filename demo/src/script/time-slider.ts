@@ -42,10 +42,10 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
   const current = () => new Date(day.getTime() + minutes * 60000)
 
   let scheduled = false
-  const schedule = () => {
+  const schedule = ({ immediate = false } = {}) => {
     if (scheduled) return
-    scheduled = true
-    requestAnimationFrame(() => {
+
+    const render = () => {
       scheduled = false
       const date = current()
       timeOut.textContent = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(
@@ -57,7 +57,15 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
         month: 'short',
       })
       onChange(date)
-    })
+    }
+
+    if (immediate) {
+      render()
+      return
+    }
+
+    scheduled = true
+    requestAnimationFrame(render)
   }
 
   minutesInput.addEventListener('input', () => {
@@ -82,7 +90,12 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
     schedule()
   })
 
-  schedule()
+  // The first frame is drawn synchronously rather than through rAF, which
+  // does not fire in a background tab -- and a link opened in one (a
+  // middle-click from a feed, say) would otherwise sit as an empty shell
+  // until it was brought to the front. Subsequent frames stay on rAF, which
+  // is what coalesces slider input.
+  schedule({ immediate: true })
 
   return { element, current }
 }

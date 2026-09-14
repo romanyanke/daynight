@@ -13,6 +13,27 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#150708" />
     <title>DayNight — is it light or dark where your user is?</title>
+
+    <!-- The page draws its map in the browser, which a link preview crawler
+         never runs, so social cards get a still rendered from the same data
+         by scripts/generate-og.mjs. Absolute URLs: crawlers do not resolve
+         relative ones. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://romanyanke.github.io/daynight/" />
+    <meta property="og:title" content="DayNight — is it light or dark where your user is?" />
+    <meta
+      property="og:description"
+      content="Day or night at your user's location, without asking them: no geolocation prompt, no IP lookup, no network request. 6.9 KB, zero dependencies."
+    />
+    <meta property="og:image" content="https://romanyanke.github.io/daynight/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="600" />
+    <meta
+      property="og:image:alt"
+      content="World map with every timezone marked, lit on the day side and dark on the night side."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://romanyanke.github.io/daynight/og.png" />
     <style>
       @import './app.css';
     </style>

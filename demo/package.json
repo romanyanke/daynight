@@ -5,7 +5,7 @@
   "browserslist": "> 2%, last 2 versions, not dead",
   "scripts": {
     "start": "rm -rf dist && parcel -p 3000",
-    "build": "rm -rf dist && parcel build --no-cache",
+    "build": "rm -rf dist && parcel build --no-cache && cp src/og.png dist/og.png",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "keywords": [],
