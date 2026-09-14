@@ -86,6 +86,32 @@ describe('White night and polar night', () => {
   })
 })
 
+describe('result is independent of the host machine timezone', () => {
+  it('gives the same result for the same inputs regardless of process.env.TZ', () => {
+    const originalTz = process.env.TZ
+    const input = {
+      timezone: 'Asia/Novosibirsk',
+      date: new Date('2015-07-15T05:15+07:00'),
+    }
+
+    try {
+      process.env.TZ = 'UTC'
+      const inUtc = daynight(input)
+
+      process.env.TZ = 'America/New_York'
+      const inNewYork = daynight(input)
+
+      process.env.TZ = 'Pacific/Kiritimati'
+      const inKiritimati = daynight(input)
+
+      expect(inNewYork).toEqual(inUtc)
+      expect(inKiritimati).toEqual(inUtc)
+    } finally {
+      process.env.TZ = originalTz
+    }
+  })
+})
+
 describe('timezone coordinates', () => {
   it('decodes the quantized [lon, lat] stored in timeZones.ts back to degrees', () => {
     expect(

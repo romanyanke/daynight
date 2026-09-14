@@ -2,7 +2,8 @@
 
 ## 4.1.0
 
-- Shrink the runtime bundle (`dist/esm/index.js`): −34% raw, −17% gzip, −20% brotli.
+- **Fix: results no longer depend on the host machine's local timezone.** `sun.ts` computed a correction from `Date.prototype.getTimezoneOffset()`, which reflects the *process's own* timezone rather than the requested `timezone` option. Whenever the two differed (e.g. any CI runner set to UTC, computing for `Asia/Novosibirsk` or `Europe/Moscow`), sunrise/sunset — and therefore `light`/`dark` — could come out wrong, especially near sunrise/sunset transitions or white nights. `sun.ts` now takes an explicit UTC offset for the requested timezone (computed via `Intl.DateTimeFormat`) instead of reading the host's own offset, and no longer touches any local (non-UTC) `Date` getter/setter. Verified across several `TZ` values.
+- Shrink the runtime bundle (`dist/esm/index.js`): −31% raw, −15% gzip, −17% brotli.
   - Store timezone coordinates as integer degrees ×10 instead of one-decimal floats (e.g. `-603` instead of `-60.3`), halved back on read. A binary+base64 packing was tried first but rejected: it shrank the raw file yet compressed worse than gzip/brotli-friendly decimal text, making the real (compressed) transfer size larger.
   - Switch `build:cjs`/`build:esm` from raw `tsc` (5 unminified files per target) to a single minified `esbuild` bundle per target. `.d.ts` generation is unchanged (`tsc --emitDeclarationOnly`), and source maps are still generated and published.
   - Fix `scripts/generate.mjs` writing to `src/timezones.ts` (lowercase `z`) while `src/daynight.ts` imports `./timeZones` — silently broken on case-sensitive filesystems (e.g. Linux CI).

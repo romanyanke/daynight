@@ -20,6 +20,12 @@ export default function sundown(
   d: Date,
   lon: number,
   lat: number,
+  // UTC offset, in minutes, of the requested timezone at `d` (same sign
+  // convention as Date.prototype.getTimezoneOffset(): positive west of UTC).
+  // Passed in explicitly instead of read from `d.getTimezoneOffset()`,
+  // because that always reflects the *host machine's* local timezone, not
+  // the timezone the caller asked about.
+  offsetMinutes: number,
 ): { sunrise: Date; sunset: Date } {
   const Rise_time = [0, 0]
   const Set_time = [0, 0]
@@ -36,9 +42,9 @@ export default function sundown(
   const julian_day = (d: Date) => {
     let a, b, jd
     let gregorian
-    let month = d.getMonth() + 1
-    const day = d.getDate()
-    let year = d.getFullYear()
+    let month = d.getUTCMonth() + 1
+    const day = d.getUTCDate()
+    let year = d.getUTCFullYear()
     gregorian = year < 1583 ? false : true
     if (month == 1 || month == 2) {
       year = year - 1
@@ -124,8 +130,13 @@ export default function sundown(
     Sky[1] = Math.atan(s / Math.sqrt(1 - s * s))
   }
 
-  const zone = Math.round(d.getTimezoneOffset() / 60)
-  let jd = julian_day(d) - 2451545 // Julian day relative to Jan 1.5, 2000
+  // The wall-clock date/time as it appears in the requested timezone: shift
+  // the instant by its UTC offset, then read it back with UTC getters. This
+  // avoids ever touching the host machine's own local timezone.
+  const local = new Date(d.getTime() - offsetMinutes * 60000)
+
+  const zone = Math.round(offsetMinutes / 60)
+  let jd = julian_day(local) - 2451545 // Julian day relative to Jan 1.5, 2000
 
   if (sgn(zone) === sgn(lon) && zone) {
     // return {
@@ -178,16 +189,17 @@ export default function sundown(
     VHz[0] = VHz[2]
   }
 
-  const sunsetTime = new Date(d.getTime())
-  const sunriseTime = new Date(d.getTime())
+  // Rise_time/Set_time are wall-clock hour/minute on `local`'s calendar day.
+  // Build them as UTC, then shift back by the same offset to get the true
+  // (host-timezone-independent) instant.
+  const zonedDate = (hour: number, minute: number) =>
+    new Date(
+      Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), hour, minute, 0) +
+        offsetMinutes * 60000,
+    )
 
-  sunsetTime.setHours(Set_time[0])
-  sunsetTime.setMinutes(Set_time[1])
-  sunsetTime.setSeconds(0)
-
-  sunriseTime.setHours(Rise_time[0])
-  sunriseTime.setMinutes(Rise_time[1])
-  sunriseTime.setSeconds(0)
+  const sunsetTime = zonedDate(Set_time[0], Set_time[1])
+  const sunriseTime = zonedDate(Rise_time[0], Rise_time[1])
 
   return {
     sunrise: sunriseTime,

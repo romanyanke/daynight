@@ -6,6 +6,12 @@ on:
   release:
     types: [created]
 
+env:
+  # sun.ts derives a correction from the runner's local timezone offset
+  # (Date.prototype.getTimezoneOffset()), so test results are only
+  # deterministic when the runner's TZ is pinned.
+  TZ: UTC
+
 jobs:
   build:
     runs-on: ubuntu-latest
