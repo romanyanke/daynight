@@ -244,6 +244,34 @@ describe('polar day and night', () => {
   })
 })
 
+describe('white nights', () => {
+  // Just south of the Arctic circle in June the sun sets after midnight and
+  // rises again an hour later, so scanning one calendar day finds a sunset
+  // that belongs to the previous night -- before that day's sunrise. Left
+  // uncorrected, `date > sunset` reported local noon as night.
+  it('does not report local noon as night', () => {
+    const result = daynight({
+      timezone: 'Asia/Krasnoyarsk',
+      date: new Date('2026-06-21T06:00:00Z'), // 13:00 local
+    })
+
+    expect(result.light).toBe(true)
+    expect(result.sunset.getTime()).toBeGreaterThan(result.sunrise.getTime())
+  })
+
+  it.each(['Atlantic/Reykjavik', 'America/Anchorage', 'America/Nome', 'America/Whitehorse'])(
+    'keeps sunset after sunrise in %s at midsummer',
+    timezone => {
+      const { sunrise, sunset } = daynight({
+        timezone,
+        date: new Date('2026-06-21T06:00:00Z'),
+      })
+
+      expect(sunset.getTime()).toBeGreaterThan(sunrise.getTime())
+    },
+  )
+})
+
 describe('renamed timezones', () => {
   // Which spelling Intl hands back depends on the runtime's ICU version, so
   // both have to work: on ICU 78 `Intl.supportedValuesOf` still reports

@@ -232,8 +232,18 @@ export default function sundown(
   // midnight: a polar night is a zero-length day, and a sun that only sets
   // today was already up when the day began.
 
-  const sunsetTime = zonedDate(Set_time[0], Set_time[1])
   const sunriseTime = zonedDate(Rise_time[0], Rise_time[1])
+  let sunsetTime = zonedDate(Set_time[0], Set_time[1])
+
+  // Both events are found by scanning one local calendar day, so at high
+  // latitudes in summer -- where the sun sets after midnight and rises again
+  // an hour or two later -- the sunset found on that day belongs to the night
+  // that began the day before, and lands *before* the sunrise. Left alone,
+  // `date > sunset` then reads as night at local noon. The sunset that
+  // follows this sunrise is the one a day later.
+  if (sunsetTime < sunriseTime) {
+    sunsetTime = new Date(sunsetTime.getTime() + 24 * 60 * 60 * 1000)
+  }
 
   return {
     sunrise: sunriseTime,
