@@ -13,8 +13,7 @@ const startOfUTCDay = (date: Date) =>
   new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
 
 /** 366 in a leap year, 365 otherwise -- the range the date slider spans. */
-const daysInYear = (year: number) =>
-  (Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / 86400000
+const daysInYear = (year: number) => (Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / 86400000
 
 /** 0 for 1 January, so the slider index is a day of the year. */
 const dayOfYear = (date: Date) =>

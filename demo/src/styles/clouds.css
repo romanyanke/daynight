@@ -1,0 +1,68 @@
+/* The daytime counterpart of the star field: a handful of soft clouds on the
+   same fixed layer geometry, behind `.page` and never clickable. */
+.clouds {
+  position: fixed;
+  /* Same overhang as `.stars` -- the layer drifts with the scroll. */
+  inset: -12vh 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--day-length) ease-out;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.day .clouds {
+  opacity: 1;
+}
+
+.cloud {
+  position: absolute;
+  /* The puffs inside are opaque, so their overlaps stay invisible; the whole
+     cloud gets its transparency here, once. */
+  opacity: var(--haze);
+  filter: blur(0.5px);
+  animation: drift var(--drift) ease-in-out var(--drift-delay) infinite alternate;
+}
+
+/* One cloud is a handful of circles standing on a common baseline plus a slab
+   joining them: flat underneath, lumpy on top, which is what reads as a cloud
+   rather than a blob. Cool grey, because the day background is itself nearly
+   white. */
+.cloud__puff,
+.cloud__base {
+  position: absolute;
+  bottom: 0;
+  background: #ccd8e4;
+}
+
+.cloud__puff {
+  border-radius: 50%;
+}
+
+.cloud__base {
+  left: 0;
+  right: 0;
+  height: 30%;
+  border-radius: 0 0 999px 999px;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(calc(-1 * var(--sway)));
+  }
+  to {
+    transform: translateX(var(--sway));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clouds {
+    transition: none;
+  }
+
+  .cloud {
+    animation: none;
+  }
+}

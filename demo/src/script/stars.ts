@@ -2,6 +2,8 @@
 // plus the occasional shooting star. Everything lives behind `.page`, so it
 // only ever shows through the page background.
 
+import { trackParallax } from './parallax'
+
 const layer = document.querySelector<HTMLElement>('[data-stars]')
 
 const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')
@@ -15,7 +17,7 @@ if (layer) {
     // A streak is a treat, not a metronome: it shows up at an unpredictable
     // gap, and only while the night side is actually on screen.
     scheduleShootingStar(layer)
-    trackParallax(layer)
+    trackParallax(layer, 0.06)
   }
 }
 
@@ -87,31 +89,4 @@ function launchShootingStar(container: HTMLElement) {
   streak.addEventListener('animationend', () => streak.remove(), { once: true })
 
   container.append(streak)
-}
-
-// A barely-there drift: the sky moves a fraction of the scroll distance, which
-// reads as depth without ever pulling the eye away from the page.
-function trackParallax(container: HTMLElement) {
-  const depth = 0.08
-  let frame = 0
-
-  const update = () => {
-    frame = 0
-    // Clamped to the overhang the stylesheet reserves, so the field never
-    // slides off its own edge on a long page.
-    const shift = Math.min(window.innerHeight * 0.1, window.scrollY * depth)
-
-    container.style.transform = `translate3d(0, ${(-shift).toFixed(1)}px, 0)`
-  }
-
-  window.addEventListener(
-    'scroll',
-    () => {
-      // One write per frame, whatever the scroll device fires.
-      if (!frame) frame = requestAnimationFrame(update)
-    },
-    { passive: true },
-  )
-
-  update()
 }
