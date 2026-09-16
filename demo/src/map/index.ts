@@ -28,9 +28,9 @@ export const mountMap = (container: HTMLElement): WorldMap => {
     throw new Error('land.ts was generated for a different projection; run `npm run generate:land`')
   }
 
-  const terminator = createTerminator()
-  container.append(terminator.element)
-
+  // Land first, then the night over the top of it. The other way round left
+  // the continents fully lit at midnight -- the shadow only ever fell on the
+  // sea -- which is exactly backwards from what the map is claiming.
   const land = document.createElementNS(svgNS, 'svg')
   land.setAttribute('viewBox', `0 0 ${VIEW.width} ${VIEW.height}`)
   land.setAttribute('class', 'map__land')
@@ -39,6 +39,9 @@ export const mountMap = (container: HTMLElement): WorldMap => {
   path.setAttribute('d', LAND_PATH)
   land.append(path)
   container.append(land)
+
+  const terminator = createTerminator()
+  container.append(terminator.element)
 
   const dots = createDots()
   container.append(dots.element)

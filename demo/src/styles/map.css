@@ -1,6 +1,9 @@
-/* The map is three stacked layers in one box: the night shading on a canvas,
-   the generated land outline, and the timezone dots on top. All three share
-   the projection in map/projection.ts, so a 2:1 box lines them up. */
+/* The map is three stacked layers in one box: the generated land outline,
+   the night shading on a canvas over it, and the timezone dots on top. All
+   three share the projection in map/projection.ts, so a 2:1 box lines them
+   up. The night has to sit above the land -- it is shading the planet, not
+   just the ocean -- while the dots stay above the night, because a dot is
+   reporting what daynight() says rather than being lit by the canvas. */
 .map {
   position: relative;
   width: 100%;
@@ -16,8 +19,8 @@
    to the full height made `translate(-50%, -125%)` shift it by 125% of the
    *map* instead of its own height, throwing it off the top of the map with
    its text stranded in the corner. */
-.map__terminator,
 .map__land,
+.map__terminator,
 .map__dots {
   position: absolute;
   inset: 0;
