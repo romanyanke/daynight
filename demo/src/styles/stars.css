@@ -1,0 +1,76 @@
+/* The night sky behind the page. Sits below `.page` (z-index 1) so the cards
+   keep their opaque backgrounds on top of it, and above nothing else -- it is
+   pure decoration and never takes a pointer event. */
+.stars {
+  position: fixed;
+  /* Taller than the viewport on both ends: the layer drifts a little with the
+     scroll (see script/stars.ts), and the overhang keeps that drift from
+     baring an empty strip at the top or the bottom. */
+  inset: -12vh 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  /* Fades in and out with the sunset/sunrise arc rather than snapping. */
+  transition: opacity var(--day-length) ease-out;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.night .stars {
+  opacity: 1;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffe0;
+  opacity: var(--bright);
+  animation: twinkle var(--twinkle) ease-in-out var(--twinkle-delay) infinite alternate;
+}
+
+@keyframes twinkle {
+  from {
+    opacity: var(--dim);
+  }
+  to {
+    opacity: var(--bright);
+  }
+}
+
+/* The head of the streak is its right edge, so the tail stretches out behind
+   the direction of travel as the element scales up. */
+.shooting-star {
+  position: absolute;
+  height: 2px;
+  width: var(--length);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(255 255 224 / 0) 0%, rgb(255 255 224 / 0.95) 100%);
+  transform-origin: 100% 50%;
+  opacity: 0;
+  animation: shoot var(--duration) ease-in forwards;
+}
+
+@keyframes shoot {
+  0% {
+    transform: rotate(var(--angle)) translateX(0) scaleX(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateX(var(--travel)) scaleX(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars {
+    transition: none;
+  }
+
+  .star {
+    animation: none;
+  }
+}

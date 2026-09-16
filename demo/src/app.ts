@@ -1,5 +1,6 @@
 import './script/theme'
 import './script/switch-theme'
+import './script/stars'
 import { mountMap } from './map'
 import { createTimeControls } from './script/time-slider'
 import { createPersonalResult } from './script/result'
