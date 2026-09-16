@@ -1,15 +1,14 @@
 // The day theme's backdrop: a few soft clouds that sway rather than race, so
 // the light side of the page has the same quiet life as the star field does.
 import { trackParallax } from './parallax'
+import { random, renderOnTheme } from './scene'
 
 const layer = document.querySelector<HTMLElement>('[data-clouds]')
 
 const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')
 
-const random = (min: number, max: number) => min + Math.random() * (max - min)
-
 if (layer) {
-  fillClouds(layer)
+  renderOnTheme(layer, 'day', fillClouds)
 
   // Clouds move a touch more than the stars: they read as the nearer layer.
   if (!prefersReducedMotion?.matches) trackParallax(layer, 0.1)

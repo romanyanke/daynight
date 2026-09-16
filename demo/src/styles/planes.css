@@ -1,0 +1,84 @@
+/* Daytime traffic: a few aircraft crossing the sky, each dragging a contrail.
+   Same fixed layer geometry as the clouds and the stars. */
+.planes {
+  position: fixed;
+  inset: -12vh 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--day-length) ease-out;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.day .planes {
+  opacity: 1;
+}
+
+/* The arm that carries the aircraft across: rotated to the heading, then
+   translated along that heading, so the trail lines up with the flight path
+   without any second angle to keep in sync. */
+.plane {
+  position: absolute;
+  height: 2px;
+  opacity: var(--haze);
+  animation: fly var(--duration) linear var(--delay) infinite;
+}
+
+/* Behind the nose, fading out towards the tail -- a contrail thins out as the
+   older part of it disperses. Cool grey for the same reason the clouds are:
+   white would be invisible on a near-white page. */
+.plane__trail {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(178 192 207 / 0) 0%, rgb(178 192 207 / 0.9) 100%);
+  transform-origin: 100% 50%;
+  animation: contrail var(--duration) linear var(--delay) infinite;
+}
+
+.plane__body {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: var(--size);
+  height: var(--size);
+  /* A blunt dart: nose to the right, swept back to two tail corners. */
+  clip-path: polygon(100% 50%, 0% 0%, 22% 50%, 0% 100%);
+  background: #7c8798;
+  transform: translateY(-50%);
+}
+
+@keyframes fly {
+  from {
+    transform: rotate(var(--angle)) translateX(-25vw);
+  }
+  to {
+    transform: rotate(var(--angle)) translateX(135vw);
+  }
+}
+
+/* The trail is only as long as the aircraft has had time to draw it, and it is
+   gone by the time the next pass starts. */
+@keyframes contrail {
+  0% {
+    transform: scaleX(0);
+  }
+  35%,
+  85% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planes {
+    /* Nothing to see without the flight: an aircraft parked in mid-air reads
+       as a smudge. */
+    display: none;
+  }
+}

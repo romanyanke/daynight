@@ -3,15 +3,14 @@
 // only ever shows through the page background.
 
 import { trackParallax } from './parallax'
+import { random, renderOnTheme } from './scene'
 
 const layer = document.querySelector<HTMLElement>('[data-stars]')
 
 const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')
 
-const random = (min: number, max: number) => min + Math.random() * (max - min)
-
 if (layer) {
-  fillStarField(layer)
+  renderOnTheme(layer, 'night', fillStarField)
 
   if (!prefersReducedMotion?.matches) {
     // A streak is a treat, not a metronome: it shows up at an unpredictable

@@ -2,6 +2,7 @@
 @import './styles/map.css';
 @import './styles/stars.css';
 @import './styles/clouds.css';
+@import './styles/planes.css';
 
 .day {
   --background: #f1eded;
