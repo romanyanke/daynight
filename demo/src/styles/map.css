@@ -180,17 +180,6 @@
   accent-color: var(--accent);
 }
 
-.controls__date {
-  font: inherit;
-  font-size: 0.9rem;
-  padding: 0.3em 0.5em;
-  border-radius: 0.4em;
-  border: 1px solid var(--map-edge);
-  background: var(--background);
-  color: var(--text);
-  color-scheme: inherit;
-}
-
 .controls__now {
   justify-self: start;
   font: inherit;

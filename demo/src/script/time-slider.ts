@@ -12,9 +12,20 @@ const MINUTES_PER_DAY = 24 * 60
 const startOfUTCDay = (date: Date) =>
   new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
 
+/** 366 in a leap year, 365 otherwise -- the range the date slider spans. */
+const daysInYear = (year: number) =>
+  (Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / 86400000
+
+/** 0 for 1 January, so the slider index is a day of the year. */
+const dayOfYear = (date: Date) =>
+  (date.getTime() - Date.UTC(date.getUTCFullYear(), 0, 1)) / 86400000
+
 export const createTimeControls = (onChange: (date: Date) => void): TimeControls => {
   const now = new Date()
-  let day = startOfUTCDay(now)
+  const year = now.getUTCFullYear()
+  const lastDay = daysInYear(year) - 1
+
+  let dayIndex = dayOfYear(startOfUTCDay(now))
   let minutes = now.getUTCHours() * 60 + now.getUTCMinutes()
 
   const element = document.createElement('div')
@@ -28,8 +39,9 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
     </label>
     <label class="controls__row">
       <span class="controls__label">Date <b class="controls__value" data-date></b></span>
-      <input type="date" class="controls__date" data-day
-             value="${day.toISOString().slice(0, 10)}" aria-label="Date">
+      <input type="range" class="controls__range" data-day
+             min="0" max="${lastDay}" step="1" value="${dayIndex}"
+             aria-label="Day of the year, ${year}">
     </label>
     <button type="button" class="controls__now" data-now>Back to now</button>
   `
@@ -39,7 +51,7 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
   const timeOut = element.querySelector<HTMLElement>('[data-time]')!
   const dateOut = element.querySelector<HTMLElement>('[data-date]')!
 
-  const current = () => new Date(day.getTime() + minutes * 60000)
+  const current = () => new Date(Date.UTC(year, 0, 1) + dayIndex * 86400000 + minutes * 60000)
 
   let scheduled = false
   const schedule = ({ immediate = false } = {}) => {
@@ -55,6 +67,7 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
         timeZone: 'UTC',
         day: 'numeric',
         month: 'short',
+        year: 'numeric',
       })
       onChange(date)
     }
@@ -74,19 +87,16 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
   })
 
   dayInput.addEventListener('input', () => {
-    const parsed = new Date(`${dayInput.value}T00:00:00Z`)
-    if (!Number.isNaN(parsed.getTime())) {
-      day = parsed
-      schedule()
-    }
+    dayIndex = Number(dayInput.value)
+    schedule()
   })
 
   element.querySelector('[data-now]')!.addEventListener('click', () => {
     const rightNow = new Date()
-    day = startOfUTCDay(rightNow)
+    dayIndex = dayOfYear(startOfUTCDay(rightNow))
     minutes = rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes()
     minutesInput.value = String(minutes)
-    dayInput.value = day.toISOString().slice(0, 10)
+    dayInput.value = String(dayIndex)
     schedule()
   })
 

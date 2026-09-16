@@ -40,9 +40,13 @@
   </head>
 
   <body>
+    <!-- The emoji sits in a child of the rotating arm: the arm has to stay as
+         tall as the viewport for its rotation to trace an arc, and a
+         full-height click target down the middle of the page would swallow
+         clicks meant for the content behind it. -->
     <div class="sky" aria-hidden="true">
-      <span class="sun">🌞</span>
-      <span class="moon">🌛</span>
+      <span class="sun"><span class="sky__body">🌞</span></span>
+      <span class="moon"><span class="sky__body">🌛</span></span>
     </div>
 
     <main class="page">
@@ -162,7 +166,7 @@
       </section>
 
       <footer class="footer">
-        <p>MIT licensed · click the sky to flip the theme by hand</p>
+        <p>MIT licensed · click the sun or the moon to flip the theme by hand</p>
       </footer>
     </main>
 

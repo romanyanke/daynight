@@ -2,14 +2,18 @@
   --angle: 170deg;
 
   user-select: none;
-  z-index: 0;
+  /* In front of the page, not behind it. At z-index 0 the sun and the moon
+     were painted under every card with an opaque background, so scrolling
+     past the hero simply swallowed them. The layer itself is click-through;
+     only the lit body takes the click, which is what the footer says to do. */
+  z-index: 2;
+  pointer-events: none;
   font-size: 3em;
   height: 100dvh;
   position: fixed;
   inset: 0;
   overflow: hidden;
   text-align: center;
-  cursor: pointer;
   transform: translateZ(0);
 }
 
@@ -26,6 +30,21 @@
   animation-direction: alternate;
   animation-fill-mode: forwards;
   pointer-events: none;
+}
+
+.sky__body {
+  display: inline-block;
+  /* Keeps the glyph readable when it is sitting on top of a card rather than
+     on the page background. */
+  filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.3));
+}
+
+/* Only whichever body is currently up is clickable -- the other one has
+   faded out and should not be catching clicks from behind it. */
+.day .sun .sky__body,
+.night .moon .sky__body {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .day .sun {

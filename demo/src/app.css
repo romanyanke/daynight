@@ -89,6 +89,25 @@ a:hover {
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9em;
+  /* Inline code in prose has no spaces to break at -- one long identifier
+     like `Intl.DateTimeFormat().resolvedOptions().timeZone` was widening the
+     page past the viewport and giving a phone a horizontal scrollbar. Let it
+     wrap mid-token; the blocks that should scroll instead (.snippet__code,
+     .api__install) set their own overflow and opt out below. */
+  overflow-wrap: anywhere;
+}
+
+pre code {
+  overflow-wrap: normal;
+}
+
+html {
+  /* Belt and braces. Nothing here should overflow sideways any more, but if
+     something ever does it must be clipped rather than turn a phone into a
+     horizontally scrolling page. Left off `body` on purpose: setting it on
+     both makes two nested scroll containers, which is what breaks
+     `position: sticky` and scroll anchoring. */
+  overflow-x: hidden;
 }
 
 .page {
