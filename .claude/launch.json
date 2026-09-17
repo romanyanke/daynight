@@ -4,8 +4,24 @@
     {
       "name": "demo",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start", "--prefix", "demo"],
+      "runtimeArgs": [
+        "start",
+        "--prefix",
+        "demo"
+      ],
       "port": 3000
+    },
+    {
+      "name": "demo-3100",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "parcel",
+        "src/index.html",
+        "-p",
+        "3100"
+      ],
+      "cwd": "demo",
+      "port": 3100
     }
   ]
 }

@@ -120,7 +120,7 @@ for (let y = 0; y < HEIGHT; y++) {
     for (let x = Math.ceil(crossings[i]); x < crossings[i + 1]; x++) put(x, y, LAND)
 }
 
-// Night side, ramped across twilight exactly as terminator.ts does.
+// Night side, ramped across twilight exactly as map/globe.ts does.
 const sun = subsolarPoint(MOMENT)
 const twilightBottom = Math.sin(-18 * DEG)
 for (let y = 0; y < HEIGHT; y++) {

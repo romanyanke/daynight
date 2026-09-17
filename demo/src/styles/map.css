@@ -1,26 +1,25 @@
-/* The map is three stacked layers in one box: the generated land outline,
-   the night shading on a canvas over it, and the timezone dots on top. All
-   three share the projection in map/projection.ts, so a 2:1 box lines them
-   up. The night has to sit above the land -- it is shading the planet, not
-   just the ocean -- while the dots stay above the night, because a dot is
-   reporting what daynight() says rather than being lit by the canvas. */
+/* The globe is two stacked layers in one square box: sea, coastline and night
+   shading on a canvas, and the timezone dots in SVG over the top. Both go
+   through the orthographic projection in map/projection.ts with the same
+   rotation, so they cannot drift apart. The dots stay above the shading --
+   a dot reports what daynight() says about its zone rather than being lit by
+   the canvas under it. */
 .map {
   position: relative;
   width: 100%;
-  aspect-ratio: 2 / 1;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  background: var(--map-sea);
-  box-shadow: inset 0 0 0 1px var(--map-edge);
+  /* A ball, so a square box: the disc is inscribed in it. */
+  aspect-ratio: 1 / 1;
+  max-width: 34rem;
+  margin: 0 auto;
+  touch-action: none;
+  cursor: grab;
 }
 
-/* The three stacked layers, each filling the box. Named explicitly rather
-   than as `.map > *`: the tooltip is also a child of .map, and stretching it
-   to the full height made `translate(-50%, -125%)` shift it by 125% of the
-   *map* instead of its own height, throwing it off the top of the map with
-   its text stranded in the corner. */
-.map__land,
-.map__terminator,
+.map--held {
+  cursor: grabbing;
+}
+
+.map__globe,
 .map__dots {
   position: absolute;
   inset: 0;
@@ -28,32 +27,21 @@
   height: 100%;
 }
 
-.map__terminator {
-  /* Drawn at 180x90 and scaled up: the browser's smoothing is what turns the
-     grid into a soft twilight band. */
-  image-rendering: auto;
+.map__globe {
   pointer-events: none;
-}
-
-.map__land {
-  pointer-events: none;
-}
-
-.map__land path {
-  fill: var(--map-land);
-  stroke: var(--map-land-edge);
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
+  /* The planet casts a little shadow of its own, which is most of what sells
+     the ball at this size. */
+  filter: drop-shadow(0 6px 18px rgb(0 0 0 / 0.22));
 }
 
 .map__dot {
   /* --brightness is written by dots.ts, straight from daynight(). */
   --brightness: 0;
   fill: color-mix(in oklab, var(--dot-day) calc(var(--brightness) * 100%), var(--dot-night));
-  /* A generous transparent stroke makes a 11-unit dot easy to hit without
+  /* A generous transparent stroke makes a 6-unit dot easy to hit without
      making it look bigger. */
   stroke: transparent;
-  stroke-width: 26;
+  stroke-width: 14;
   transition: fill 0.08s linear;
   cursor: crosshair;
 }
@@ -61,7 +49,7 @@
 .map__dot:hover,
 .map__dot:focus-visible {
   stroke: var(--dot-focus);
-  stroke-width: 8;
+  stroke-width: 4;
   outline: none;
 }
 
@@ -69,43 +57,43 @@
    marked rather than left to read as an ordinary bright or dark dot. */
 .map__dot--polar {
   stroke: var(--dot-polar);
-  stroke-width: 5;
+  stroke-width: 2.5;
 }
 
 .map__dot--home {
   fill: var(--dot-home);
   stroke: var(--dot-home);
-  stroke-width: 6;
+  stroke-width: 3;
   animation: dot-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes dot-pulse {
   0%,
   100% {
-    r: 11;
+    r: 6;
   }
   50% {
-    r: 22;
+    r: 12;
   }
 }
 
-/* The map keeps its 2:1 aspect, so on a phone it is only a few hundred
-   pixels wide and a dot sized for the desktop shrinks to about two pixels.
-   Scale the dots with the map rather than letting them disappear. */
+/* On a phone the globe is only a few hundred pixels across and a dot sized
+   for the desktop shrinks to about two pixels. Scale the dots with it rather
+   than letting them disappear. */
 @media (max-width: 40rem) {
   .map__dot {
-    r: 18;
+    r: 10;
   }
   .map__dot--home {
-    stroke-width: 10;
+    stroke-width: 5;
   }
   @keyframes dot-pulse {
     0%,
     100% {
-      r: 18;
+      r: 10;
     }
     50% {
-      r: 30;
+      r: 17;
     }
   }
 }
@@ -113,7 +101,7 @@
 @media (prefers-reduced-motion: reduce) {
   .map__dot--home {
     animation: none;
-    r: 18;
+    r: 10;
   }
 }
 
