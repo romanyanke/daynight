@@ -56,7 +56,7 @@
          clicks meant for the content behind it. -->
     <div class="sky" aria-hidden="true">
       <span class="sun"><span class="sky__body">🌞</span></span>
-      <span class="moon"><span class="sky__body">🌛</span></span>
+      <span class="moon"><span class="sky__body" data-moon>🌛</span></span>
     </div>
 
     <!-- The switch the sky hands over to once the hero title is out of reach.
@@ -69,7 +69,9 @@
     >
       <span class="toggle__slider"></span>
       <span class="toggle__label toggle__label--day">🌞 Day</span>
-      <span class="toggle__label toggle__label--night">🌛 Night</span>
+      <span class="toggle__label toggle__label--night"
+        ><span class="toggle__moon" data-moon>🌛</span> Night</span
+      >
     </button>
 
     <main class="page">

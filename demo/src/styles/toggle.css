@@ -77,6 +77,12 @@
   transform: translateX(100%);
 }
 
+/* The switch's moon is flipped for the southern hemisphere like the hero's
+   one, so it needs a box of its own to be transformed in. */
+.toggle__moon {
+  display: inline-block;
+}
+
 .toggle__label {
   position: relative;
   flex: 1 0 auto;

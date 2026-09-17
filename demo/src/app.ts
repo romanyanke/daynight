@@ -8,9 +8,11 @@ import { mountMap } from './map'
 import { createTimeControls } from './script/time-slider'
 import { createPersonalResult } from './script/result'
 import { createSnippet } from './script/snippet'
+import { createMoon } from './script/moon'
 
 const map = mountMap(document.querySelector<HTMLElement>('[data-map]')!)
 const personal = createPersonalResult()
+const moon = createMoon()
 const snippet = createSnippet()
 
 document.querySelector('[data-personal]')!.append(personal.element)
@@ -28,6 +30,11 @@ const controls = createTimeControls(
   date => {
     const elapsed = map.setDate(date)
     const personalResult = personal.update(date)
+
+    // Seen from the visitor's own latitude, so a southern visitor gets the
+    // moon the right way round. Zero -- the equator -- when the browser's
+    // timezone is not one the table can place.
+    moon.update(date, personalResult?.coordinates[1] ?? 0)
 
     // The map recomputed every zone just now, so the focused dot already holds
     // a result for this instant -- no need to call daynight() again for it.
