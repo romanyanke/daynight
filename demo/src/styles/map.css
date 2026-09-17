@@ -269,6 +269,13 @@
   accent-color: var(--accent);
 }
 
+/* The two shortcuts sit on one line and wrap together on a narrow screen. */
+.controls__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .controls__now {
   justify-self: start;
   font: inherit;

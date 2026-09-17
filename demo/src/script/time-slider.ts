@@ -60,7 +60,10 @@ export const createTimeControls = (
              min="0" max="${lastDay}" step="1" value="${dayIndex}"
              aria-label="Day of the year, ${year}">
     </label>
-    <button type="button" class="controls__now" data-now>Back to now</button>
+    <div class="controls__buttons">
+      <button type="button" class="controls__now" data-now>Back to now</button>
+      <button type="button" class="controls__now" data-random>Random moment</button>
+    </div>
   `
 
   const minutesInput = element.querySelector<HTMLInputElement>('[data-minutes]')!
@@ -125,11 +128,7 @@ export const createTimeControls = (
     rewind = 0
   }
 
-  const goToNow = () => {
-    const rightNow = new Date()
-    const targetDay = dayOfYear(startOfUTCDay(rightNow))
-    const targetMinutes = rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes()
-
+  const travelTo = (targetDay: number, targetMinutes: number) => {
     const set = (day: number, minute: number) => {
       dayIndex = day
       minutes = minute
@@ -173,7 +172,20 @@ export const createTimeControls = (
   element.querySelector('[data-now]')!.addEventListener('click', () => {
     stopRewind()
     onNow()
-    goToNow()
+
+    const rightNow = new Date()
+    travelTo(
+      dayOfYear(startOfUTCDay(rightNow)),
+      rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes(),
+    )
+  })
+
+  // Somewhere else in the year, at some other hour. The place stays put --
+  // whichever zone the page is reporting on is still the one it reports on --
+  // so what moves is only the light.
+  element.querySelector('[data-random]')!.addEventListener('click', () => {
+    stopRewind()
+    travelTo(Math.floor(Math.random() * (lastDay + 1)), Math.floor(Math.random() * MINUTES_PER_DAY))
   })
 
   // The first frame is drawn synchronously rather than through rAF, which
