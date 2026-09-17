@@ -59,6 +59,19 @@
       <span class="moon"><span class="sky__body">🌛</span></span>
     </div>
 
+    <!-- The switch the sky hands over to once the hero title is out of reach.
+         See script/toggle.ts. -->
+    <button
+      class="toggle"
+      type="button"
+      data-toggle
+      aria-label="Switch between the day and night theme"
+    >
+      <span class="toggle__slider"></span>
+      <span class="toggle__label toggle__label--day">🌞 Day</span>
+      <span class="toggle__label toggle__label--night">🌛 Night</span>
+    </button>
+
     <main class="page">
       <header class="hero">
         <h1 class="hero__title"><span class="day">Day</span><span class="night">Night</span></h1>

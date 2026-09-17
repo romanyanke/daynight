@@ -3,6 +3,7 @@
 @import './styles/stars.css';
 @import './styles/clouds.css';
 @import './styles/planes.css';
+@import './styles/toggle.css';
 
 .day {
   --background: #f1eded;
