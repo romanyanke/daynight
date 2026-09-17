@@ -19,10 +19,25 @@ const daysInYear = (year: number) => (Date.UTC(year + 1, 0, 1) - Date.UTC(year, 
 const dayOfYear = (date: Date) =>
   (date.getTime() - Date.UTC(date.getUTCFullYear(), 0, 1)) / 86400000
 
+const wrap = (value: number, span: number) => ((value % span) + span) % span
+
+/**
+ * How far to move from `from` to `to` on a dial of `span` steps, taking
+ * whichever way round is shorter. Negative to go backwards.
+ */
+const shortestStep = (from: number, to: number, span: number) => {
+  const forwards = wrap(to - from, span)
+  return forwards <= span / 2 ? forwards : forwards - span
+}
+
 export const createTimeControls = (
   onChange: (date: Date) => void,
   onNow: () => void = () => {},
 ): TimeControls => {
+  const prefersReducedMotion = Boolean(
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  )
+
   const now = new Date()
   const year = now.getUTCFullYear()
   const lastDay = daysInYear(year) - 1
@@ -84,23 +99,81 @@ export const createTimeControls = (
   }
 
   minutesInput.addEventListener('input', () => {
+    // A hand on a slider wins over an animation still playing.
+    stopRewind()
     minutes = Number(minutesInput.value)
     schedule()
   })
 
   dayInput.addEventListener('input', () => {
+    stopRewind()
     dayIndex = Number(dayInput.value)
     schedule()
   })
 
-  element.querySelector('[data-now]')!.addEventListener('click', () => {
-    onNow()
+  // Winding the clock back rather than snapping it: the sliders travel to now
+  // over the same moment the globe takes to turn there, so the terminator
+  // sweeps across the map instead of jumping. Both dials are circular, so each
+  // takes the short way round -- from 23:50 to 00:10 is twenty minutes
+  // forwards, not a whole day backwards.
+  const REWIND = 900
+
+  let rewind = 0
+
+  const stopRewind = () => {
+    cancelAnimationFrame(rewind)
+    rewind = 0
+  }
+
+  const goToNow = () => {
     const rightNow = new Date()
-    dayIndex = dayOfYear(startOfUTCDay(rightNow))
-    minutes = rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes()
-    minutesInput.value = String(minutes)
-    dayInput.value = String(dayIndex)
-    schedule()
+    const targetDay = dayOfYear(startOfUTCDay(rightNow))
+    const targetMinutes = rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes()
+
+    const set = (day: number, minute: number) => {
+      dayIndex = day
+      minutes = minute
+      minutesInput.value = String(minutes)
+      dayInput.value = String(dayIndex)
+      schedule()
+    }
+
+    if (prefersReducedMotion) {
+      set(targetDay, targetMinutes)
+      return
+    }
+
+    const fromDay = dayIndex
+    const fromMinutes = minutes
+    const dayCount = lastDay + 1
+
+    const dayStep = shortestStep(fromDay, targetDay, dayCount)
+    const minuteStep = shortestStep(fromMinutes, targetMinutes, MINUTES_PER_DAY)
+
+    if (dayStep === 0 && minuteStep === 0) return
+
+    const started = performance.now()
+
+    const rewindFrame = () => {
+      const t = Math.min(1, (performance.now() - started) / REWIND)
+      // Ease out, matching the globe's glide, so the two read as one movement.
+      const eased = 1 - Math.pow(1 - t, 3)
+
+      set(
+        wrap(Math.round(fromDay + dayStep * eased), dayCount),
+        wrap(Math.round(fromMinutes + minuteStep * eased), MINUTES_PER_DAY),
+      )
+
+      rewind = t < 1 ? requestAnimationFrame(rewindFrame) : 0
+    }
+
+    rewindFrame()
+  }
+
+  element.querySelector('[data-now]')!.addEventListener('click', () => {
+    stopRewind()
+    onNow()
+    goToNow()
   })
 
   // The first frame is drawn synchronously rather than through rAF, which
