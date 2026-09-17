@@ -273,6 +273,20 @@ html {
   line-height: 1.55;
 }
 
+/* The word between the two blocks, standing in for the arrow a comment used to
+   carry inside the code. */
+.snippet__returns {
+  margin: 0.55rem 0 0.35rem;
+  color: var(--caption);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.snippet__code--result {
+  color: var(--caption);
+}
+
 .snippet__copy {
   position: absolute;
   top: 0.6rem;

@@ -27,14 +27,20 @@ export interface Snippet {
 }
 
 export const createSnippet = (): Snippet => {
+  // The call and what it returned are two blocks, not one: a result pasted
+  // into a code block as a comment is something you have to mentally strip out
+  // before using it, and the arrow between them says the same thing better.
   const element = document.createElement('div')
   element.className = 'snippet'
   element.innerHTML = `
     <pre class="snippet__code"><code data-code></code></pre>
     <button type="button" class="snippet__copy" data-copy>Copy</button>
+    <p class="snippet__returns" aria-hidden="true">returns</p>
+    <pre class="snippet__code snippet__code--result"><code data-result></code></pre>
   `
 
   const code = element.querySelector<HTMLElement>('[data-code]')!
+  const returned = element.querySelector<HTMLElement>('[data-result]')!
   const copy = element.querySelector<HTMLButtonElement>('[data-copy]')!
   let text = ''
 
@@ -54,7 +60,8 @@ export const createSnippet = (): Snippet => {
       const call = `import daynight from 'daynight'\n\ndaynight({\n  timezone: '${timezone}',\n  date: ${asDate(date)},\n})`
 
       text = call
-      code.textContent = result ? `${call}\n\n// → ${asResult(result)}` : `${call}\n\n// → throws`
+      code.textContent = call
+      returned.textContent = result ? asResult(result) : 'throws'
     },
   }
 }

@@ -104,7 +104,12 @@ export const mountMap = (container: HTMLElement): WorldMap => {
     }
   })
 
-  for (const view of [globe, flat]) view.render(date)
+  // Colour before the first draw: without it the dots would sit at the
+  // stylesheet's default shade until something moved the clock.
+  for (const view of [globe, flat]) {
+    view.dots.paint()
+    view.render(date)
+  }
 
   return {
     zoneCount: state.zones.length,

@@ -9,6 +9,19 @@
 // one, and the globe and the flat map pass their own.
 import { Zone, ZoneState, SHADES } from './zone-state'
 
+/**
+ * The dot radius in viewBox units, shared by both views, and the larger one
+ * for a phone -- where the same box is a few hundred pixels wide and a
+ * desktop-sized dot shrinks to about two.
+ *
+ * Both are set as the `r` attribute rather than in the stylesheet: `r` is an
+ * SVG geometry property, and only Chromium implements those as CSS. Safari and
+ * Firefox drew every dot at radius zero, which is to say not at all.
+ */
+const BASE_RADIUS = 17
+const PHONE_RADIUS = 26
+const PHONE = '(max-width: 40rem)'
+
 /** Writes the position of a zone into `out`; returns false for a zone out of sight. */
 export type Place = (zone: Zone, out: Float64Array) => boolean
 
@@ -47,6 +60,16 @@ export const createDots = (
     element.append(circle)
     circles.set(zone.timezone, circle)
   }
+
+  const phone = window.matchMedia?.(PHONE)
+
+  const sizeDots = () => {
+    const radius = String(phone?.matches ? PHONE_RADIUS : BASE_RADIUS)
+    for (const circle of circles.values()) circle.setAttribute('r', radius)
+  }
+
+  sizeDots()
+  phone?.addEventListener?.('change', sizeDots)
 
   const point = new Float64Array(2)
 

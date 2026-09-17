@@ -143,10 +143,14 @@
 .map__dot {
   /* --brightness is written by dots.ts, straight from daynight(). */
   --brightness: 0;
-  r: 11;
+  /* The radius is an attribute written by dots.ts, not a property here: only
+     Chromium implements SVG geometry properties in CSS. Scaling, which every
+     browser does support, is what this file uses instead. */
+  transform-box: fill-box;
+  transform-origin: center;
   fill: color-mix(in oklab, var(--dot-day) calc(var(--brightness) * 100%), var(--dot-night));
-  /* A generous transparent stroke makes an 11-unit dot easy to hit without
-     making it look bigger. */
+  /* A generous transparent stroke makes the dot easy to hit without making it
+     look bigger. */
   stroke: transparent;
   stroke-width: 26;
   transition: fill 0.08s linear;
@@ -177,38 +181,25 @@
 @keyframes dot-pulse {
   0%,
   100% {
-    r: 11;
+    transform: scale(1);
   }
   50% {
-    r: 22;
+    transform: scale(1.8);
   }
 }
 
-/* On a phone the globe is only a few hundred pixels across and a dot sized
-   for the desktop shrinks to about two pixels. Scale the dots with it rather
-   than letting them disappear. */
+/* The phone size of a dot is dots.ts's business, for the same reason; all that
+   is left here is the heavier ring on the visitor's own zone. */
 @media (max-width: 40rem) {
-  .map__dot {
-    r: 18;
-  }
   .map__dot--home {
     stroke-width: 10;
-  }
-  @keyframes dot-pulse {
-    0%,
-    100% {
-      r: 18;
-    }
-    50% {
-      r: 30;
-    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .map__dot--home {
     animation: none;
-    r: 18;
+    transform: scale(1.4);
   }
 }
 
