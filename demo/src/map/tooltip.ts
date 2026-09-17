@@ -1,5 +1,5 @@
 import { DaynightResult } from 'daynight'
-import { Dot } from './dots'
+import { ZoneState } from './zone-state'
 
 const timeIn = (date: Date, timezone: string) =>
   date.toLocaleTimeString([], { timeZone: timezone, hour: '2-digit', minute: '2-digit' })
@@ -27,29 +27,29 @@ export interface Tooltip {
   refresh(date: Date): void
 }
 
-export const createTooltip = (container: HTMLElement, dots: Dot[]): Tooltip => {
+export const createTooltip = (container: HTMLElement, state: ZoneState): Tooltip => {
   const element = document.createElement('div')
   element.className = 'map__tooltip'
   element.setAttribute('role', 'status')
   element.hidden = true
 
-  const byTimezone = new Map(dots.map(dot => [dot.timezone, dot]))
-  let shown: Dot | undefined
+  let shown: string | undefined
   let lastDate = new Date()
 
   const show = (target: EventTarget | null) => {
-    const timezone = (target as Element | null)?.getAttribute?.('data-timezone')
-    const dot = timezone ? byTimezone.get(timezone) : undefined
-    if (!dot) return
+    const circle = target as SVGCircleElement | null
+    const timezone = circle?.getAttribute?.('data-timezone')
+    const zone = timezone ? state.byTimezone.get(timezone) : undefined
+    if (!zone || !circle) return
 
-    shown = dot
-    element.textContent = describe(dot.result, lastDate)
+    shown = timezone!
+    element.textContent = describe(zone.result, lastDate)
     // Unhide before measuring: offsetWidth is 0 while the element is hidden.
     element.hidden = false
 
     // Position from the circle's own on-screen box, so this works the same
     // for a mouse hover and for keyboard focus, which has no pointer.
-    const box = dot.circle.getBoundingClientRect()
+    const box = circle.getBoundingClientRect()
     const bounds = container.getBoundingClientRect()
 
     // On a phone the map is only a few hundred pixels wide -- narrower than a
@@ -92,7 +92,8 @@ export const createTooltip = (container: HTMLElement, dots: Dot[]): Tooltip => {
     element,
     refresh(date) {
       lastDate = date
-      if (shown) element.textContent = describe(shown.result, date)
+      const zone = shown ? state.byTimezone.get(shown) : undefined
+      if (zone) element.textContent = describe(zone.result, date)
     },
   }
 }

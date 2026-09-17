@@ -6,6 +6,9 @@ import { Rotation } from './projection'
 /** Degrees of rotation per pixel dragged, at the globe's own size. */
 const SENSITIVITY = 0.32
 
+/** How long a glide to a place takes, in ms. */
+const GLIDE = 900
+
 /** Per-frame decay of a flick, and the speed below which it is over. */
 const FRICTION = 0.94
 const STOPPED = 0.02
@@ -14,6 +17,8 @@ export interface Spin {
   rotation: Rotation
   /** True while a finger or button is down, or the flick is still running. */
   moving(): boolean
+  /** Turns the globe to put a place in the middle, over about a second. */
+  glideTo(lon: number, lat: number): void
 }
 
 export const createSpin = (
@@ -41,6 +46,10 @@ export const createSpin = (
 
   container.addEventListener('pointerdown', event => {
     if (pointer !== null) return
+    // As a thumbnail the globe is a button, not a control: a press there is on
+    // its way to becoming a click that brings it to the front, and nudging the
+    // rotation on the way would be a surprise.
+    if (container.classList.contains('map--pip')) return
 
     pointer = event.pointerId
     lastX = event.clientX
@@ -101,6 +110,9 @@ export const createSpin = (
 
   // Arrow keys turn it too, for anyone not using a pointer.
   container.addEventListener('keydown', event => {
+    // As a thumbnail it is a button; the arrow keys belong to the page.
+    if (container.classList.contains('map--pip')) return
+
     const step = event.shiftKey ? 15 : 5
 
     switch (event.key) {
@@ -126,5 +138,42 @@ export const createSpin = (
   return {
     rotation,
     moving: () => pointer !== null || coasting !== 0,
+
+    glideTo(lon, lat) {
+      cancelAnimationFrame(coasting)
+      coasting = 0
+      velocityLon = 0
+      velocityLat = 0
+
+      // The short way round: from Tokyo to Los Angeles the globe should cross
+      // the Pacific, not wind back over Europe.
+      const deltaLon = ((((lon - rotation.lon) % 360) + 540) % 360) - 180
+      const deltaLat = lat - rotation.lat
+
+      if (prefersReducedMotion) {
+        turn(deltaLon, deltaLat)
+        return
+      }
+
+      const fromLon = rotation.lon
+      const fromLat = rotation.lat
+      const started = performance.now()
+
+      const fly = () => {
+        const t = Math.min(1, (performance.now() - started) / GLIDE)
+        // Ease out: leaves quickly, settles gently, which reads as the globe
+        // being turned rather than snapped.
+        const eased = 1 - Math.pow(1 - t, 3)
+
+        rotation.lon = fromLon + deltaLon * eased
+        rotation.lat = fromLat + deltaLat * eased
+        onChange()
+
+        if (t < 1) coasting = requestAnimationFrame(fly)
+        else coasting = 0
+      }
+
+      fly()
+    },
   }
 }

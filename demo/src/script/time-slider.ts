@@ -19,7 +19,10 @@ const daysInYear = (year: number) => (Date.UTC(year + 1, 0, 1) - Date.UTC(year, 
 const dayOfYear = (date: Date) =>
   (date.getTime() - Date.UTC(date.getUTCFullYear(), 0, 1)) / 86400000
 
-export const createTimeControls = (onChange: (date: Date) => void): TimeControls => {
+export const createTimeControls = (
+  onChange: (date: Date) => void,
+  onNow: () => void = () => {},
+): TimeControls => {
   const now = new Date()
   const year = now.getUTCFullYear()
   const lastDay = daysInYear(year) - 1
@@ -91,6 +94,7 @@ export const createTimeControls = (onChange: (date: Date) => void): TimeControls
   })
 
   element.querySelector('[data-now]')!.addEventListener('click', () => {
+    onNow()
     const rightNow = new Date()
     dayIndex = dayOfYear(startOfUTCDay(rightNow))
     minutes = rightNow.getUTCHours() * 60 + rightNow.getUTCMinutes()

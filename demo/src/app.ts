@@ -22,24 +22,29 @@ const stats = document.querySelector<HTMLElement>('[data-stats]')!
 // by default, whichever dot they point at otherwise.
 let focused = personal.timezone
 
-const controls = createTimeControls(date => {
-  const elapsed = map.setDate(date)
-  const personalResult = personal.update(date)
+// "Back to now" puts the clock back where it started -- and turns the globe
+// back to the visitor's own corner of it, which is what "now" means to them.
+const controls = createTimeControls(
+  date => {
+    const elapsed = map.setDate(date)
+    const personalResult = personal.update(date)
 
-  // The map recomputed every zone just now, so the focused dot already holds
-  // a result for this instant -- no need to call daynight() again for it.
-  const focusedResult =
-    focused === personal.timezone ? personalResult : (map.dotFor(focused)?.result ?? null)
+    // The map recomputed every zone just now, so the focused dot already holds
+    // a result for this instant -- no need to call daynight() again for it.
+    const focusedResult =
+      focused === personal.timezone ? personalResult : (map.dotFor(focused)?.result ?? null)
 
-  snippet.update(focused, date, focusedResult)
+    snippet.update(focused, date, focusedResult)
 
-  stats.innerHTML = `
+    stats.innerHTML = `
     <b>${map.zoneCount}</b> daynight() calls in <b>${elapsed.toFixed(1)} ms</b>
     <span>·</span> 6.9 KB gzipped
     <span>·</span> 0 dependencies
     <span>·</span> 0 permissions
   `
-})
+  },
+  () => map.focusHome(),
+)
 
 document.querySelector('[data-controls]')!.append(controls.element)
 

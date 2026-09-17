@@ -1,86 +1,140 @@
-import { createGlobe } from './globe'
-import { createDots, Dot } from './dots'
+// Both views of the same world at once: whichever is in front fills the box,
+// the other sits in the corner as a thumbnail. Clicking the thumbnail swaps
+// them, and the two slide and scale past each other on the way.
+import { createGlobeView, WorldView } from './globe-view'
+import { createFlatView } from './flat-view'
 import { createTooltip } from './tooltip'
-import { createSpin } from './spin'
+import { createZoneState, Zone } from './zone-state'
 import { THEME_EVENT } from '../script/theme'
 
 export interface WorldMap {
   /** Redraws for `date`; returns how long recomputing every zone took, in ms. */
   setDate(date: Date): number
-  /** Marks one zone as the visitor's own. */
+  /** Marks one zone as the visitor's own, and remembers it for `focusHome`. */
   highlight(timezone: string): void
+  /** Turns the globe to the visitor's own zone. */
+  focusHome(): void
   /** How many zones are actually plotted. */
   zoneCount: number
   /** The plotted zone by name, carrying its latest result. */
-  dotFor(timezone: string): Dot | undefined
+  dotFor(timezone: string): Zone | undefined
 }
 
 export const mountMap = (container: HTMLElement): WorldMap => {
-  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-  // The globe is a control, not a picture: it takes focus so the arrow keys in
-  // spin.ts reach it without a pointer.
-  container.tabIndex = 0
-  container.setAttribute('role', 'application')
-  container.setAttribute(
-    'aria-label',
-    'Globe of every timezone. Drag, or use the arrow keys, to spin it.',
+  const prefersReducedMotion = Boolean(
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   )
 
-  // Globe below, dots above: a dot reports what daynight() says about a zone,
-  // so it is never dimmed by the shading drawn under it.
-  const globe = createGlobe()
-  container.append(globe.element)
+  const state = createZoneState()
 
-  const dots = createDots()
-  container.append(dots.element)
+  const globe = createGlobeView(state, prefersReducedMotion)
+  const flat = createFlatView(state)
 
-  const tooltip = createTooltip(container, dots.dots)
+  // The globe leads: it is the one that says "planet" at a glance. The flat
+  // map is there for what a ball cannot do -- show every zone at once.
+  let front: WorldView = globe
+  let back: WorldView = flat
+
+  container.append(globe.element, flat.element)
+
+  const tooltips = [globe, flat].map(view => createTooltip(view.element, state))
 
   let date = new Date()
-  let frame = 0
+  let home: string | undefined
 
-  const render = () => {
-    frame = 0
-    globe.draw(date, spin.rotation)
-    dots.place(spin.rotation)
+  const arrange = () => {
+    front.element.classList.add('map--front')
+    front.element.classList.remove('map--pip')
+    front.element.removeAttribute('title')
+    front.element.setAttribute('role', front.frontRole.role)
+    front.element.setAttribute('aria-label', front.frontRole.label)
+    // Only the globe is something you operate; the flat map is a picture.
+    if (front.frontRole.role === 'application') {
+      front.element.tabIndex = 0
+    } else {
+      front.element.removeAttribute('tabindex')
+    }
+
+    // The thumbnail is a button, and says so to a screen reader as well as to
+    // a mouse pointer.
+    back.element.classList.add('map--pip')
+    back.element.classList.remove('map--front')
+    back.element.title = back.pipLabel
+    back.element.setAttribute('role', 'button')
+    back.element.setAttribute('aria-label', back.pipLabel)
+    back.element.tabIndex = 0
   }
 
-  // One render per frame however many turns, resizes or redraws ask for it.
-  const invalidate = () => {
-    if (!frame) frame = requestAnimationFrame(render)
+  const swap = () => {
+    const wasFront = front
+    front = back
+    back = wasFront
+
+    arrange()
+    // The thumbnail was drawn for a corner of the box; now it has the whole of
+    // it, and a canvas has to be told.
+    front.invalidate()
+    back.invalidate()
   }
 
-  const spin = createSpin(container, invalidate, Boolean(prefersReducedMotion))
+  // Only the thumbnail takes the click. The front view's own pointer handling
+  // -- spinning the globe, hovering a dot -- has to stay its own.
+  for (const view of [globe, flat]) {
+    view.element.addEventListener('click', () => {
+      if (view === back) swap()
+    })
 
-  // The canvas is sized from its box, and the box follows the page width.
-  new ResizeObserver(invalidate).observe(container)
+    view.element.addEventListener('keydown', event => {
+      if (view !== back) return
+      if (event.key !== 'Enter' && event.key !== ' ') return
+
+      event.preventDefault()
+      swap()
+    })
+  }
+
+  arrange()
 
   // Sea, land and rim are theme colours read out of CSS, so they have to be
   // re-read when the theme flips -- a canvas does not cascade.
   document.addEventListener(THEME_EVENT, () => {
-    globe.refreshColours()
-    invalidate()
+    for (const view of [globe, flat]) {
+      view.refreshColours()
+      view.invalidate()
+    }
   })
 
-  const byTimezone = new Map(dots.dots.map(dot => [dot.timezone, dot]))
-
-  render()
+  for (const view of [globe, flat]) view.render(date)
 
   return {
-    zoneCount: dots.dots.length,
-    dotFor: timezone => byTimezone.get(timezone),
+    zoneCount: state.zones.length,
+    dotFor: timezone => state.byTimezone.get(timezone),
+
     setDate(next) {
       date = next
-      const elapsed = dots.draw(next)
-      invalidate()
-      tooltip.refresh(next)
+      const elapsed = state.update(next)
+
+      for (const view of [globe, flat]) {
+        view.dots.paint()
+        view.render(next)
+      }
+
+      // A tooltip left open keeps showing live values.
+      for (const tooltip of tooltips) tooltip.refresh(next)
+
       return elapsed
     },
+
     highlight(timezone) {
-      for (const dot of dots.dots) {
-        dot.circle.classList.toggle('map__dot--home', dot.timezone === timezone)
-      }
+      home = timezone
+      for (const view of [globe, flat]) view.dots.highlight(timezone)
+    },
+
+    focusHome() {
+      const zone = home ? state.byTimezone.get(home) : undefined
+      if (!zone) return
+
+      globe.focus(zone.lon, zone.lat)
     },
   }
 }

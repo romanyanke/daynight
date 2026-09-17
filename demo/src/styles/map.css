@@ -1,47 +1,154 @@
-/* The globe is two stacked layers in one square box: sea, coastline and night
-   shading on a canvas, and the timezone dots in SVG over the top. Both go
-   through the orthographic projection in map/projection.ts with the same
-   rotation, so they cannot drift apart. The dots stay above the shading --
-   a dot reports what daynight() says about its zone rather than being lit by
-   the canvas under it. */
-.map {
+/* Two views of the same world, stacked in one box: the globe and the flat
+   map. Whichever is in front fills the box; the other is scaled down into a
+   corner as a thumbnail, and clicking it swaps the two.
+
+   The swap is a transform, not a change of size: the views keep their real
+   layout, so nothing reflows and the canvases are not resized mid-animation.
+   That also means the thumbnail is drawn at full resolution and merely shown
+   small, which is why it stays crisp. */
+.world {
   position: relative;
   width: 100%;
-  /* A ball, so a square box: the disc is inscribed in it. */
-  aspect-ratio: 1 / 1;
-  max-width: 34rem;
-  margin: 0 auto;
-  touch-action: none;
-  cursor: grab;
+  /* Sized for the flat map; the globe is a square inside the same box. */
+  aspect-ratio: 2 / 1;
 }
 
-.map--held {
-  cursor: grabbing;
+.map {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  transition:
+    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.55s ease,
+    border-radius 0.55s ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .map {
+    transition: none;
+  }
+}
+
+/* The layers of one view. The night has to sit above the land -- it is
+   shading the planet, not just the ocean -- while the dots stay above the
+   night, because a dot reports what daynight() says rather than being lit by
+   the canvas under it. */
+.map__land,
+.map__terminator,
 .map__globe,
 .map__dots {
   position: absolute;
+}
+
+/* Each view keeps its own shape inside the shared box: the flat map spans the
+   width, the globe is a disc as tall as the box. */
+.map--flat .map__land,
+.map--flat .map__terminator,
+.map--flat .map__dots {
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.map__globe {
+.map--flat {
+  overflow: hidden;
+  background: var(--map-sea);
+  box-shadow: inset 0 0 0 1px var(--map-edge);
+}
+
+.map--globe .map__globe,
+.map--globe .map__dots {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.map--globe .map__globe {
   pointer-events: none;
   /* The planet casts a little shadow of its own, which is most of what sells
      the ball at this size. */
   filter: drop-shadow(0 6px 18px rgb(0 0 0 / 0.22));
 }
 
+.map--globe.map--front {
+  cursor: grab;
+  touch-action: none;
+}
+
+.map--globe.map--front:active {
+  cursor: grabbing;
+}
+
+/* The thumbnail. Scaled towards the corner it sits in, so the transform alone
+   places it -- and reversing it is what plays the zoom back out. */
+.map--pip {
+  z-index: 2;
+  transform-origin: 100% 100%;
+  transform: translate(-3%, -6%) scale(0.28);
+  cursor: zoom-in;
+}
+
+/* Only the flat map is a rectangle, so only it gets the frame. The globe
+   already reads as an object on its own, and framing its box would draw a
+   border round a lot of nothing. */
+.map--flat.map--pip {
+  box-shadow:
+    0 6px 20px rgb(0 0 0 / 0.28),
+    0 0 0 4px var(--surface);
+  border-radius: 2rem;
+  overflow: hidden;
+}
+
+/* Inside a thumbnail nothing is interactive: hovering a two-pixel dot or
+   spinning a globe the size of a stamp is not a thing anyone is trying to do.
+   The click goes to the thumbnail itself, which brings it to the front. */
+.map--pip * {
+  pointer-events: none;
+}
+
+/* And nothing pops up there either: a tooltip scaled to a quarter size is
+   unreadable, and it would be a caption on the wrong picture. */
+.map--pip .map__tooltip {
+  display: none;
+}
+
+.map--front {
+  z-index: 1;
+  transform: none;
+}
+
+.map__terminator {
+  /* Drawn at 180x90 and scaled up: the browser's smoothing is what turns the
+     grid into a soft twilight band. */
+  image-rendering: auto;
+  pointer-events: none;
+}
+
+.map__land {
+  pointer-events: none;
+}
+
+.map__land path {
+  fill: var(--map-land);
+  stroke: var(--map-land-edge);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
 .map__dot {
   /* --brightness is written by dots.ts, straight from daynight(). */
   --brightness: 0;
+  r: 11;
   fill: color-mix(in oklab, var(--dot-day) calc(var(--brightness) * 100%), var(--dot-night));
-  /* A generous transparent stroke makes a 6-unit dot easy to hit without
+  /* A generous transparent stroke makes an 11-unit dot easy to hit without
      making it look bigger. */
   stroke: transparent;
-  stroke-width: 14;
+  stroke-width: 26;
   transition: fill 0.08s linear;
   cursor: crosshair;
 }
@@ -49,7 +156,7 @@
 .map__dot:hover,
 .map__dot:focus-visible {
   stroke: var(--dot-focus);
-  stroke-width: 4;
+  stroke-width: 8;
   outline: none;
 }
 
@@ -57,23 +164,23 @@
    marked rather than left to read as an ordinary bright or dark dot. */
 .map__dot--polar {
   stroke: var(--dot-polar);
-  stroke-width: 2.5;
+  stroke-width: 5;
 }
 
 .map__dot--home {
   fill: var(--dot-home);
   stroke: var(--dot-home);
-  stroke-width: 3;
+  stroke-width: 6;
   animation: dot-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes dot-pulse {
   0%,
   100% {
-    r: 6;
+    r: 11;
   }
   50% {
-    r: 12;
+    r: 22;
   }
 }
 
@@ -82,18 +189,18 @@
    than letting them disappear. */
 @media (max-width: 40rem) {
   .map__dot {
-    r: 10;
+    r: 18;
   }
   .map__dot--home {
-    stroke-width: 5;
+    stroke-width: 10;
   }
   @keyframes dot-pulse {
     0%,
     100% {
-      r: 10;
+      r: 18;
     }
     50% {
-      r: 17;
+      r: 30;
     }
   }
 }
@@ -101,7 +208,7 @@
 @media (prefers-reduced-motion: reduce) {
   .map__dot--home {
     animation: none;
-    r: 10;
+    r: 18;
   }
 }
 
