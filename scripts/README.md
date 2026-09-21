@@ -34,3 +34,32 @@ Writes `demo/src/map/zones.ts`, the list of zone names the demo plots, from
 the committed `src/timeZones.ts`. Needs no download, so `npm run
 generate:zones` can be run any time -- and should be, after regenerating the
 coordinate table.
+
+## generate-og.mjs
+
+Renders `demo/src/og.png`, the 1200x600 card social networks show when the
+demo is linked. The page draws its map in the browser and a preview crawler
+never runs that, so the card has to be a still.
+
+Run `npm run generate:og`. It needs `dist/` built first (`npm run build`),
+because it calls the library itself rather than reimplementing it.
+
+## generate-hero.mjs
+
+Renders `assets/hero.gif`, the spinning globe at the top of the README.
+GitHub strips `<script>`, `<canvas>` and `<iframe>` out of markdown, so the
+interactive demo cannot be embedded -- an animated GIF linking to it is as
+close as the format allows.
+
+Run `npm run generate:hero`, again after `npm run build`. Over one loop the
+globe turns once while two days pass, so the terminator makes a full sweep
+over the ground and every zone dot goes from night to day and back. The loop
+starts at the June solstice on purpose: the sun's declination is at its
+extreme there and barely moves across the two days, so the last frame lines up
+with the first instead of jumping.
+
+Both generators share `render-shared.mjs` -- one palette, one solar model, one
+land parser -- so the card and the globe cannot drift apart. Both write their
+image formats by hand (`zlib` for PNG, a small LZW coder for GIF) rather than
+pulling in an image library, for the same reason the package itself has no
+runtime dependencies.

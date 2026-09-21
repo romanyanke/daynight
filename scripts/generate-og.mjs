@@ -7,10 +7,25 @@
 // picture in a tweet is the map, not an artist's impression of it. Written
 // with zlib rather than an image library: a PNG of flat colours is a few
 // dozen lines, and this repository ships no runtime dependencies.
+//
+// The palette, the solar model and the land parser live in render-shared.mjs,
+// alongside the globe the README uses; see that file.
 import fs from 'fs'
 import zlib from 'zlib'
 import { createRequire } from 'module'
 import { VIEW, project } from '../demo/src/map/projection.ts'
+import {
+  SEA,
+  LAND,
+  NIGHT,
+  DOT_DAY,
+  DOT_NIGHT,
+  subsolarPoint,
+  darknessAt,
+  blend,
+  landRings,
+  zoneNames,
+} from './render-shared.mjs'
 
 const require = createRequire(import.meta.url)
 const daynight = require('../dist/cjs/index.js').default
@@ -27,37 +42,6 @@ const HEIGHT = 600
 // so the file only changes when the map really does.
 const MOMENT = new Date('2026-06-21T09:30:00Z')
 
-const SEA = [214, 222, 229]
-const LAND = [176, 184, 175]
-const NIGHT = [4, 8, 20]
-const DOT_DAY = [255, 198, 92]
-const DOT_NIGHT = [47, 61, 92]
-
-const DEG = Math.PI / 180
-
-const subsolarPoint = date => {
-  const days = date.getTime() / 86400000 - 10957.5
-  const meanLongitude = (280.46 + 0.9856474 * days) * DEG
-  const meanAnomaly = (357.528 + 0.9856003 * days) * DEG
-  const eclipticLongitude =
-    meanLongitude + (1.915 * Math.sin(meanAnomaly) + 0.02 * Math.sin(2 * meanAnomaly)) * DEG
-  const obliquity = (23.439 - 0.0000004 * days) * DEG
-  const declination = Math.asin(Math.sin(obliquity) * Math.sin(eclipticLongitude))
-  const rightAscension = Math.atan2(
-    Math.cos(obliquity) * Math.sin(eclipticLongitude),
-    Math.cos(eclipticLongitude),
-  )
-  const gmst = 280.46061837 + 360.98564736629 * days
-  return {
-    lon: ((((rightAscension / DEG - gmst) % 360) + 540) % 360) - 180,
-    lat: declination / DEG,
-  }
-}
-
-const sunAltitudeSin = (lon, lat, sun) =>
-  Math.sin(lat * DEG) * Math.sin(sun.lat * DEG) +
-  Math.cos(lat * DEG) * Math.cos(sun.lat * DEG) * Math.cos((lon - sun.lon) * DEG)
-
 const pixels = Buffer.alloc(WIDTH * HEIGHT * 3)
 const put = (x, y, colour) => {
   if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT) return
@@ -70,7 +54,6 @@ const at = (x, y) => {
   const offset = (y * WIDTH + x) * 3
   return [pixels[offset], pixels[offset + 1], pixels[offset + 2]]
 }
-const blend = (from, to, amount) => from.map((v, i) => Math.round(v + (to[i] - v) * amount))
 
 // Viewport units of the generated path scale straight to image pixels.
 const scale = ([x, y]) => [(x / VIEW.width) * WIDTH, (y / VIEW.height) * HEIGHT]
@@ -78,30 +61,7 @@ const scale = ([x, y]) => [(x / VIEW.width) * WIDTH, (y / VIEW.height) * HEIGHT]
 for (let y = 0; y < HEIGHT; y++) for (let x = 0; x < WIDTH; x++) put(x, y, SEA)
 
 // Land, filled by scanline from the same path the page renders.
-const landSource = fs.readFileSync('demo/src/map/land.ts', 'utf-8')
-const path = landSource.match(/LAND_PATH =\s*'([^']*)'/)[1]
-
-const rings = []
-{
-  let ring = null
-  let x = 0
-  let y = 0
-  const command = /([MlZ])(-?\d+)? ?(-?\d+)?/g
-  let match
-  while ((match = command.exec(path))) {
-    if (match[1] === 'M') {
-      ring = []
-      rings.push(ring)
-      x = Number(match[2])
-      y = Number(match[3])
-      ring.push([x, y])
-    } else if (match[1] === 'l') {
-      x += Number(match[2])
-      y += Number(match[3])
-      ring.push([x, y])
-    }
-  }
-}
+const rings = landRings()
 
 for (let y = 0; y < HEIGHT; y++) {
   const crossings = []
@@ -122,20 +82,17 @@ for (let y = 0; y < HEIGHT; y++) {
 
 // Night side, ramped across twilight exactly as map/globe.ts does.
 const sun = subsolarPoint(MOMENT)
-const twilightBottom = Math.sin(-18 * DEG)
 for (let y = 0; y < HEIGHT; y++) {
   const lat = VIEW.latMax - ((y + 0.5) / HEIGHT) * (VIEW.latMax - VIEW.latMin)
   for (let x = 0; x < WIDTH; x++) {
     const lon = VIEW.lonMin + ((x + 0.5) / WIDTH) * (VIEW.lonMax - VIEW.lonMin)
-    const altitude = sunAltitudeSin(lon, lat, sun)
-    const darkness = altitude >= 0 ? 0 : altitude <= twilightBottom ? 1 : altitude / twilightBottom
+    const darkness = darknessAt(lon, lat, sun)
     if (darkness > 0) put(x, y, blend(at(x, y), NIGHT, darkness * 0.78))
   }
 }
 
 // One dot per zone, coloured by real brightness.
-const zoneSource = fs.readFileSync('demo/src/map/zones.ts', 'utf-8')
-const zones = [...zoneSource.matchAll(/'([A-Za-z_]+(?:\/[A-Za-z_+-]+)+)'/g)].map(m => m[1])
+const zones = zoneNames()
 
 let plotted = 0
 for (const timezone of zones) {

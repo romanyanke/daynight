@@ -1,7 +1,7 @@
 {
   "name": "daynight",
   "version": "4.2.0",
-  "description": "",
+  "description": "Is it light or dark where your user is? Find out without asking them, in 6.9 KB. No permission prompt, no IP lookup, no network request.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -10,6 +10,7 @@
     "generate:land": "node scripts/generate-land.mjs",
     "generate:zones": "node scripts/generate-zones.mjs",
     "generate:og": "node scripts/generate-og.mjs",
+    "generate:hero": "node scripts/generate-hero.mjs",
     "test": "vitest run",
     "format": "prettier --write .",
     "build:cjs": "esbuild src/index.ts --bundle --minify --sourcemap --target=es2018 --format=cjs --platform=node --outfile=dist/cjs/index.js",
@@ -27,6 +28,7 @@
   ],
   "author": "Roman Yanke <roman@yanke.world>",
   "license": "MIT",
+  "homepage": "https://romanyanke.github.io/daynight/",
   "devDependencies": {
     "esbuild": "^0.28.2",
     "jsts": "2.12.1",
