@@ -32,7 +32,7 @@
     "jsts": "2.12.1",
     "prettier": "3.9.6",
     "typescript": "6.0.2",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "repository": {
     "type": "git",
